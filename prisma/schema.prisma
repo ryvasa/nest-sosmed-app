@@ -1,0 +1,112 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @unique @default(uuid())
+  username      String         @unique @db.VarChar(100)
+  password      String
+  email         String         @unique @db.VarChar(100)
+  token         String?
+  avatar        String?
+  created_at    DateTime       @default(now())
+  updated_at    DateTime       @updatedAt
+  chats         Chat[]
+  comment_likes Comment_Like[]
+  rooms         Room[]
+  comments      Comment[]
+  thread_likes  Thread_Like[]
+  threads       Thread[]
+
+  @@map("users")
+}
+
+model Thread {
+  id           String        @id @unique @default(uuid())
+  body         String
+  user_id      String
+  created_at   DateTime      @default(now())
+  updated_at   DateTime      @updatedAt
+  comments     Comment[]
+  images       Image[]
+  thread_likes Thread_Like[]
+  user         User          @relation(fields: [user_id], references: [id])
+
+  @@map("threads")
+}
+
+model Image {
+  id         String   @id @unique @default(uuid())
+  image      String
+  thread_id  String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  thread     Thread   @relation(fields: [thread_id], references: [id])
+
+  @@map("images")
+}
+
+model Thread_Like {
+  id         String   @id @unique @default(uuid())
+  like       Boolean
+  dislike    Boolean
+  user_id    String
+  thread_id  String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  thread     Thread   @relation(fields: [thread_id], references: [id])
+  user       User     @relation(fields: [user_id], references: [id])
+
+  @@map("thread_likes")
+}
+
+model Comment {
+  id            String         @id @unique @default(uuid())
+  body          String
+  user_id       String
+  thread_id     String
+  created_at    DateTime       @default(now())
+  updated_at    DateTime       @updatedAt
+  comment_likes Comment_Like[]
+  thread        Thread         @relation(fields: [thread_id], references: [id])
+  user          User           @relation(fields: [user_id], references: [id])
+
+  @@map("comments")
+}
+
+model Comment_Like {
+  id         String   @id @unique @default(uuid())
+  like       Boolean
+  dislike    Boolean
+  user_id    String
+  comment_id String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  comment    Comment  @relation(fields: [comment_id], references: [id])
+  user       User     @relation(fields: [user_id], references: [id])
+}
+
+model Chat {
+  id         String   @id @unique @default(uuid())
+  room_id    String
+  user_id    String
+  message    String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  room       Room     @relation(fields: [room_id], references: [id])
+  user       User     @relation(fields: [user_id], references: [id])
+}
+
+model Room {
+  id         String   @id @unique @default(uuid())
+  user_id    String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  chat       Chat[]
+  user       User     @relation(fields: [user_id], references: [id])
+}
