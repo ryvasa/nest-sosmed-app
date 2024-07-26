@@ -11,7 +11,7 @@ export class TestService {
   async deleteUser() {
     await this.prismaService.user.deleteMany({
       where: {
-        username: 'test',
+        email: 'test@gmail.com',
       },
     });
   }
@@ -19,7 +19,7 @@ export class TestService {
   async getUser(): Promise<User> {
     return this.prismaService.user.findUnique({
       where: {
-        username: 'test',
+        email: 'test@gmail.com',
       },
     });
   }

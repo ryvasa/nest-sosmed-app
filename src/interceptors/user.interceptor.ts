@@ -6,22 +6,27 @@ import {
 } from '@nestjs/common';
 import { map, Observable } from 'rxjs';
 @Injectable()
-export class AuthResponseInterceptor implements NestInterceptor {
+export class UserInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, handler: CallHandler): Observable<any> {
     return handler.handle().pipe(
       map((data) => {
         if (typeof data === 'string') {
           return { message: data };
-        }
-        const res = {
-          data: {
+        } else if (Array.isArray(data)) {
+          return data.map((item) => ({
+            id: item.id,
+            avatar: item.avatar,
+            username: item.username,
+          }));
+        } else {
+          const res = {
             id: data.id,
             avatar: data.avatar,
             email: data.email,
             username: data.username,
-          },
-        };
-        return res;
+          };
+          return res;
+        }
       }),
     );
   }

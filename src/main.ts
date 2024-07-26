@@ -5,6 +5,7 @@ import * as cookieParser from 'cookie-parser';
 import * as passport from 'passport';
 import { ValidationPipe } from '@nestjs/common';
 import { HttpExceptionFilter } from './common/http-exception';
+import { GlobalInterceptor } from './interceptors/global.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
@@ -20,6 +21,7 @@ async function bootstrap() {
   app.use(passport.initialize());
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalInterceptors(new GlobalInterceptor());
   app.enableCors();
   app.use(cookieParser());
 

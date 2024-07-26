@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../common/prisma.service';
 import { JwtService } from '@nestjs/jwt';
-import { ResponseAuthDto } from './dto/response-auth.dto';
 import * as bcrypt from 'bcrypt';
 import { RegisterAuthDto } from './dto/register-auth.dto';
 import { Response } from 'express';
@@ -40,7 +39,7 @@ export class AuthService {
     return null;
   }
 
-  async register(registerUserDto: RegisterAuthDto): Promise<ResponseAuthDto> {
+  async register(registerUserDto: RegisterAuthDto): Promise<User> {
     if (registerUserDto.confirmPassword !== registerUserDto.password) {
       throw new BadRequestException('Confirm password and password not match.');
     }
@@ -68,7 +67,7 @@ export class AuthService {
     const user = await this.prismaService.user.create({
       data,
     });
-    return { username: user.username, email: user.email };
+    return user;
   }
 
   async login(user: User, res: Response) {
@@ -89,7 +88,7 @@ export class AuthService {
     return user;
   }
 
-  async me(id: string): Promise<ResponseAuthDto> {
+  async me(id: string): Promise<User> {
     const auth = await this.prismaService.user.findFirst({ where: { id } });
     return auth;
   }

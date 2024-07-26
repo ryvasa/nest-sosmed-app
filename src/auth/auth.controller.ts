@@ -15,9 +15,10 @@ import { RegisterAuthDto } from './dto/register-auth.dto';
 import { Response } from 'express';
 import { LocalAuthGuard } from './utils/local/local-auth.guard';
 import { JwtAuthGuard } from './utils/jwt/jwt.auth.guard';
-import { AuthResponseInterceptor } from '../interceptors/auth-response-format.interceptor';
+import { LoginAuthDto } from './dto/login-auth.dto';
+import { UserInterceptor } from '../interceptors/user.interceptor';
 
-@UseInterceptors(new AuthResponseInterceptor())
+@UseInterceptors(new UserInterceptor())
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
@@ -46,17 +47,21 @@ export class AuthController {
   })
   @ApiResponse({ status: 401, description: 'Wrong password.' })
   @ApiResponse({ status: 200, description: 'Login User.' })
-  login(@Req() req, @Res() res: Response) {
+  login(@Body() loginAuthDto: LoginAuthDto, @Req() req, @Res() res: Response) {
     return this.authService.login(req.user, res);
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({ status: 200, description: 'Current User.' })
   @Get('me')
   async me(@Req() request) {
     return this.authService.me(request.user.id);
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({ status: 200, description: 'Logout success.' })
   @Delete('logout')
   async logout(
     @Res({ passthrough: true }) response: Response,

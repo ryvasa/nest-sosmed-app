@@ -6,6 +6,7 @@ import { AppModule } from './../src/app.module';
 import { TestService } from './test.service';
 import { TestModule } from './test.module';
 import { HttpExceptionFilter } from '../src/common/http-exception';
+import { GlobalInterceptor } from '../src/interceptors/global.interceptor';
 
 describe('Authentication', () => {
   let app: INestApplication;
@@ -19,6 +20,7 @@ describe('Authentication', () => {
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(new ValidationPipe());
     app.useGlobalFilters(new HttpExceptionFilter());
+    app.useGlobalInterceptors(new GlobalInterceptor());
     app.use(cookieParser());
 
     await app.init();
@@ -185,7 +187,7 @@ describe('Authentication', () => {
         .set('Cookie', cookies);
 
       expect(response.status).toBe(200);
-      expect(response.body.message).toBeDefined();
+      expect(response.body.data.message).toBeDefined();
     });
   });
 });
