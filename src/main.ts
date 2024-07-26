@@ -3,6 +3,8 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
 import * as passport from 'passport';
+import { ValidationPipe } from '@nestjs/common';
+import { HttpExceptionFilter } from './common/http-exception';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: true });
@@ -16,7 +18,8 @@ async function bootstrap() {
   SwaggerModule.setup('api', app, document);
 
   app.use(passport.initialize());
-
+  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalFilters(new HttpExceptionFilter());
   app.enableCors();
   app.use(cookieParser());
 
