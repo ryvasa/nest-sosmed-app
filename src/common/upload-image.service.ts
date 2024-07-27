@@ -19,10 +19,7 @@ export class UploadImageService {
   //   return filePath;
   // }
   async deleteFile(fileName: string): Promise<void> {
-    const filePath = path.join(
-      path.join(__dirname, '../../images/avatars'),
-      fileName,
-    );
+    const filePath = path.join(path.join(__dirname, '../../'), fileName);
 
     return new Promise((resolve, reject) => {
       fs.unlink(filePath, (err) => {

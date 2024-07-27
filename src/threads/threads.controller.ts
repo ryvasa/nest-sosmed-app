@@ -31,7 +31,9 @@ import { UpdateThreadDto } from './dto/update-thread.dto';
 import { JwtAuthGuard } from '../auth/utils/jwt/jwt.auth.guard';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { photosStorage } from '../common/storage.config';
+import { ThreadInterceptor } from '../interceptors/thread.interceptor';
 
+@UseInterceptors(new ThreadInterceptor())
 @UseGuards(JwtAuthGuard)
 @ApiTags('threads')
 @Controller('threads')

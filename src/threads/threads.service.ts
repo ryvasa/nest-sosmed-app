@@ -28,7 +28,7 @@ export class ThreadsService {
       data: { user_id: userId, body: createThreadDto.body },
     });
 
-    if (files.length > 0) {
+    if (files && files.length > 0) {
       await this.prismaService.image.createMany({
         data: files.map((file) => {
           return {
@@ -44,6 +44,13 @@ export class ThreadsService {
       include: {
         user: { select: { username: true, avatar: true } },
         images: { select: { image: true } },
+        _count: {
+          select: {
+            thread_likes: true,
+            thread_dislikes: true,
+            comments: true,
+          },
+        },
       },
     });
     return createdThread;
@@ -55,7 +62,7 @@ export class ThreadsService {
         body: { contains: body },
       },
       include: {
-        user: { select: { username: true, avatar: true } },
+        user: { select: { id: true, username: true, avatar: true } },
         images: { select: { image: true } },
         _count: {
           select: {
@@ -140,9 +147,9 @@ export class ThreadsService {
     return updatedThread;
   }
 
-  async remove(id: string, userId: string): Promise<any> {
+  async remove(id: string, userId: string): Promise<string> {
     await this.validateAuthor(id, userId);
     await this.prismaService.thread.delete({ where: { id } });
-    return { message: 'Thread deleted' };
+    return 'Thread deleted';
   }
 }

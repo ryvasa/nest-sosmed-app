@@ -30,14 +30,14 @@ model User {
 model Thread {
   id           String        @id @unique @default(uuid())
   body         String
-  user_id      String
+  user_id      String?       
   created_at   DateTime      @default(now())
   updated_at   DateTime      @updatedAt
   comments     Comment[]
   images       Image[]
   thread_likes Thread_Like[]
   thread_dislikes Thread_Dislike[]
-  user         User          @relation(fields: [user_id], references: [id])
+  user         User?          @relation(fields: [user_id], references: [id],onDelete: SetNull)
 
   @@map("threads")
 }
@@ -56,38 +56,38 @@ model Image {
 model Thread_Like {
   id         String   @id @unique @default(uuid())
   like       Boolean
-  user_id    String
+  user_id    String?
   thread_id  String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   thread     Thread   @relation(fields: [thread_id], references: [id],onDelete: Cascade)
-  user       User     @relation(fields: [user_id], references: [id])
+  user       User?     @relation(fields: [user_id], references: [id],onDelete: SetNull)
 
   @@map("thread_likes")
 }
 model Thread_Dislike {
   id         String   @id @unique @default(uuid())
   dislike    Boolean
-  user_id    String
+  user_id    String?
   thread_id  String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   thread     Thread   @relation(fields: [thread_id], references: [id],onDelete: Cascade)
-  user       User     @relation(fields: [user_id], references: [id])
+  user       User?     @relation(fields: [user_id], references: [id],onDelete: SetNull)
 
   @@map("thread_dislikes")
 }
 model Comment {
   id            String         @id @unique @default(uuid())
   body          String
-  user_id       String
+  user_id       String?
   thread_id     String
   created_at    DateTime       @default(now())
   updated_at    DateTime       @updatedAt
   comment_likes Comment_Like[]
   comment_dislikes Comment_Dislike[]
   thread        Thread         @relation(fields: [thread_id], references: [id],onDelete: Cascade)
-  user          User           @relation(fields: [user_id], references: [id])
+  user          User?          @relation(fields: [user_id], references: [id],onDelete: SetNull)
 
   @@map("comments")
 }
@@ -95,12 +95,12 @@ model Comment {
 model Comment_Like {
   id         String   @id @unique @default(uuid())
   like       Boolean
-  user_id    String
+  user_id    String? 
   comment_id String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   comment    Comment  @relation(fields: [comment_id], references: [id],onDelete: Cascade)
-  user       User     @relation(fields: [user_id], references: [id])
+  user       User?     @relation(fields: [user_id], references: [id],onDelete: SetNull)
 
   @@map("comment_likes")
 }
@@ -108,12 +108,12 @@ model Comment_Like {
 model Comment_Dislike {
   id         String   @id @unique @default(uuid())
   dislike    Boolean
-  user_id    String
+  user_id    String?
   comment_id String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   comment    Comment  @relation(fields: [comment_id], references: [id],onDelete: Cascade)
-  user       User     @relation(fields: [user_id], references: [id])
+  user       User?     @relation(fields: [user_id], references: [id],onDelete: SetNull)
 
   @@map("comment_dislikes")
 }
@@ -121,12 +121,12 @@ model Comment_Dislike {
 model Chat {
   id         String   @id @unique @default(uuid())
   room_id    String
-  user_id    String
+  user_id    String?
   message    String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   room       Room     @relation(fields: [room_id], references: [id])
-  user       User     @relation(fields: [user_id], references: [id])
+  user       User?     @relation(fields: [user_id], references: [id],onDelete: SetNull)
 
   @@map("chats")
 
@@ -134,11 +134,11 @@ model Chat {
 
 model Room {
   id         String   @id @unique @default(uuid())
-  user_id    String
+  user_id    String?
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
   chat       Chat[]
-  user       User     @relation(fields: [user_id], references: [id])
+  user       User?     @relation(fields: [user_id], references: [id],onDelete: SetNull)
 
   @@map("rooms")
 }

@@ -45,7 +45,7 @@ describe('Users', () => {
 
   describe('GET /users', () => {
     beforeEach(async () => {
-      await testService.deleteUser();
+      await testService.deleteAll();
     });
     it('should be rejected if not logged in', async () => {
       const response = await request(app.getHttpServer()).get('/users');
@@ -114,7 +114,7 @@ describe('Users', () => {
 
   describe('PATCH /users', () => {
     beforeEach(async () => {
-      await testService.deleteUser();
+      await testService.deleteAll();
     });
     it('should be rejected if not login', async () => {
       await loginAndGetCookie();
@@ -204,9 +204,7 @@ describe('Users', () => {
       expect(response.body.data.email).toBeDefined();
       expect(response.body.data.avatar).toContain('/images/avatars/');
 
-      const fileName = response.body.data.avatar.split('/images/avatars/')[1];
-
-      await testService.deleteImage(fileName);
+      testService.deleteImage(response.body.data.avatar);
     });
   });
 });
