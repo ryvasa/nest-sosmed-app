@@ -1,4 +1,4 @@
-images/avatars/*
+images/*/*
 # compiled output
 /dist
 /node_modules

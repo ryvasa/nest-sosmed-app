@@ -5,16 +5,16 @@ import { PrismaClient } from '@prisma/client';
 export class PrismaService extends PrismaClient implements OnModuleInit {
   constructor() {
     super();
-    console.log('Create Prisma Service');
+    // console.log('Create Prisma Service');
   }
 
   onModuleInit() {
-    console.info('Connect Prisma');
+    // console.info('Connect Prisma');
     this.$connect();
   }
 
   onModuleDestroy() {
-    console.info('Disconnect Prisma');
+    // console.info('Disconnect Prisma');
     this.$disconnect();
   }
 }

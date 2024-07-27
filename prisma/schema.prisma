@@ -12,15 +12,16 @@ model User {
   username      String         @unique @db.VarChar(100)
   password      String
   email         String         @unique @db.VarChar(100)
-  token         String?
   avatar        String?
   created_at    DateTime       @default(now())
   updated_at    DateTime       @updatedAt
   chats         Chat[]
   comment_likes Comment_Like[]
+  comment_dislikes Comment_Dislike[]
   rooms         Room[]
   comments      Comment[]
   thread_likes  Thread_Like[]
+  thread_dislikes Thread_Dislike[]
   threads       Thread[]
 
   @@map("users")
@@ -35,6 +36,7 @@ model Thread {
   comments     Comment[]
   images       Image[]
   thread_likes Thread_Like[]
+  thread_dislikes Thread_Dislike[]
   user         User          @relation(fields: [user_id], references: [id])
 
   @@map("threads")
@@ -46,7 +48,7 @@ model Image {
   thread_id  String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
-  thread     Thread   @relation(fields: [thread_id], references: [id])
+  thread     Thread   @relation(fields: [thread_id], references: [id], onDelete: Cascade) 
 
   @@map("images")
 }
@@ -54,17 +56,27 @@ model Image {
 model Thread_Like {
   id         String   @id @unique @default(uuid())
   like       Boolean
+  user_id    String
+  thread_id  String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  thread     Thread   @relation(fields: [thread_id], references: [id],onDelete: Cascade)
+  user       User     @relation(fields: [user_id], references: [id])
+
+  @@map("thread_likes")
+}
+model Thread_Dislike {
+  id         String   @id @unique @default(uuid())
   dislike    Boolean
   user_id    String
   thread_id  String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
-  thread     Thread   @relation(fields: [thread_id], references: [id])
+  thread     Thread   @relation(fields: [thread_id], references: [id],onDelete: Cascade)
   user       User     @relation(fields: [user_id], references: [id])
 
-  @@map("thread_likes")
+  @@map("thread_dislikes")
 }
-
 model Comment {
   id            String         @id @unique @default(uuid())
   body          String
@@ -73,7 +85,8 @@ model Comment {
   created_at    DateTime       @default(now())
   updated_at    DateTime       @updatedAt
   comment_likes Comment_Like[]
-  thread        Thread         @relation(fields: [thread_id], references: [id])
+  comment_dislikes Comment_Dislike[]
+  thread        Thread         @relation(fields: [thread_id], references: [id],onDelete: Cascade)
   user          User           @relation(fields: [user_id], references: [id])
 
   @@map("comments")
@@ -82,13 +95,27 @@ model Comment {
 model Comment_Like {
   id         String   @id @unique @default(uuid())
   like       Boolean
+  user_id    String
+  comment_id String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  comment    Comment  @relation(fields: [comment_id], references: [id],onDelete: Cascade)
+  user       User     @relation(fields: [user_id], references: [id])
+
+  @@map("comment_likes")
+}
+
+model Comment_Dislike {
+  id         String   @id @unique @default(uuid())
   dislike    Boolean
   user_id    String
   comment_id String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
-  comment    Comment  @relation(fields: [comment_id], references: [id])
+  comment    Comment  @relation(fields: [comment_id], references: [id],onDelete: Cascade)
   user       User     @relation(fields: [user_id], references: [id])
+
+  @@map("comment_dislikes")
 }
 
 model Chat {
@@ -100,6 +127,9 @@ model Chat {
   updated_at DateTime @updatedAt
   room       Room     @relation(fields: [room_id], references: [id])
   user       User     @relation(fields: [user_id], references: [id])
+
+  @@map("chats")
+
 }
 
 model Room {
@@ -109,4 +139,6 @@ model Room {
   updated_at DateTime @updatedAt
   chat       Chat[]
   user       User     @relation(fields: [user_id], references: [id])
+
+  @@map("rooms")
 }

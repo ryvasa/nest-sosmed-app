@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { ThreadsModule } from './threads/threads.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { ImagesModule } from './images/images.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { join } from 'path';
     UsersModule,
     AuthModule,
     ThreadsModule,
+    ImagesModule,
   ],
   controllers: [],
   providers: [],

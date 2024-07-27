@@ -198,12 +198,15 @@ describe('Users', () => {
         .field('username', 'updated')
         .attach('avatar', join(__dirname, 'image.png'));
 
-      console.log(response.body);
       expect(response.status).toBe(200);
       expect(response.body.data.username).toBeDefined();
       expect(response.body.data.id).toBeDefined();
       expect(response.body.data.email).toBeDefined();
       expect(response.body.data.avatar).toContain('/images/avatars/');
+
+      const fileName = response.body.data.avatar.split('/images/avatars/')[1];
+
+      await testService.deleteImage(fileName);
     });
   });
 });

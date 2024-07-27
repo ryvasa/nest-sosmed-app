@@ -8,31 +8,93 @@ import {
   Delete,
   Req,
   UseGuards,
+  UseInterceptors,
+  UploadedFiles,
+  ParseFilePipe,
+  MaxFileSizeValidator,
+  FileTypeValidator,
+  Query,
+  ParseIntPipe,
 } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiConsumes,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ThreadsService } from './threads.service';
 import { CreateThreadDto } from './dto/create-thread.dto';
 import { UpdateThreadDto } from './dto/update-thread.dto';
 import { JwtAuthGuard } from '../auth/utils/jwt/jwt.auth.guard';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { photosStorage } from '../common/storage.config';
 
+@UseGuards(JwtAuthGuard)
 @ApiTags('threads')
 @Controller('threads')
 export class ThreadsController {
   constructor(private readonly threadsService: ThreadsService) {}
 
-  @UseGuards(JwtAuthGuard)
   @ApiResponse({ status: 201, description: 'Create Threads.' })
   @ApiOperation({ summary: 'Create New Threads' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        body: {
+          type: 'string',
+        },
+        images: {
+          type: 'array',
+          items: {
+            type: 'string',
+            format: 'binary',
+          },
+        },
+      },
+    },
+  })
   @Post()
-  create(@Req() request, @Body() createThreadDto: CreateThreadDto) {
-    return this.threadsService.create(request.user.id, createThreadDto);
+  @UseInterceptors(FilesInterceptor('images', 4, photosStorage))
+  create(
+    @UploadedFiles(
+      new ParseFilePipe({
+        fileIsRequired: false,
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 2000000 }),
+          new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' }),
+        ],
+      }),
+    )
+    files: Express.Multer.File[],
+    @Req() request,
+    @Body() createThreadDto: CreateThreadDto,
+  ) {
+    return this.threadsService.create(files, request.user.id, createThreadDto);
   }
 
-  @ApiResponse({ status: 200, description: 'Get Threads.' })
-  @ApiOperation({ summary: 'Get Latest Threads' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({ status: 200, description: 'Send Threads.' })
+  @ApiResponse({ status: 404, description: 'Thread Not Found.' })
+  @ApiQuery({ name: 'body', required: false, type: String })
+  @ApiQuery({ name: 'take', required: false, type: String })
+  @ApiQuery({ name: 'skip', required: false, type: String })
+  @ApiOperation({ summary: 'Get All Users' })
   @Get()
-  findAll() {
-    return this.threadsService.findAll();
+  findAll(
+    @Query('body') body?: string,
+    @Query('take', new ParseIntPipe({ optional: true })) take?: number,
+    @Query('skip', new ParseIntPipe({ optional: true })) skip?: number,
+  ) {
+    return this.threadsService.findAll({
+      body,
+      take: take || 30,
+      skip: skip || 0,
+    });
   }
 
   @ApiResponse({ status: 200, description: 'Get Thread.' })
@@ -41,16 +103,54 @@ export class ThreadsController {
   @ApiParam({ name: 'id' })
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.threadsService.findOne(+id);
+    return this.threadsService.findOne(id);
   }
 
   @ApiResponse({ status: 200, description: 'Update Thread.' })
   @ApiResponse({ status: 404, description: 'Threads Not Found.' })
   @ApiOperation({ summary: 'Update Thread By Id' })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        body: {
+          type: 'string',
+        },
+        images: {
+          type: 'array',
+          items: {
+            type: 'string',
+            format: 'binary',
+          },
+        },
+      },
+    },
+  })
+  @UseInterceptors(FilesInterceptor('images', 4, photosStorage))
   @ApiParam({ name: 'id' })
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateThreadDto: UpdateThreadDto) {
-    return this.threadsService.update(+id, updateThreadDto);
+  update(
+    @UploadedFiles(
+      new ParseFilePipe({
+        fileIsRequired: false,
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 2000000 }),
+          new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' }),
+        ],
+      }),
+    )
+    files: Express.Multer.File[],
+    @Param('id') id: string,
+    @Body() updateThreadDto: UpdateThreadDto,
+    @Req() request,
+  ) {
+    return this.threadsService.update({
+      files,
+      id,
+      updateThreadDto,
+      userId: request.user.id,
+    });
   }
 
   @ApiResponse({ status: 200, description: 'Delete Thread.' })
@@ -58,7 +158,7 @@ export class ThreadsController {
   @ApiOperation({ summary: 'Delete Thread By Id' })
   @ApiParam({ name: 'id' })
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.threadsService.remove(+id);
+  remove(@Param('id') id: string, @Req() request) {
+    return this.threadsService.remove(id, request.user.id);
   }
 }

@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -8,11 +7,21 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from '@prisma/client';
 import { PrismaService } from '../common/prisma.service';
 import * as bcrypt from 'bcrypt';
-import { extname } from 'path';
+import { UploadImageService } from '../common/upload-image.service';
+
+interface UpdateParams {
+  file?: Express.Multer.File; // file adalah opsional
+  id: string;
+  updateUserDto: UpdateUserDto;
+  userId: string;
+}
 
 @Injectable()
 export class UsersService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private uploadImageService: UploadImageService,
+  ) {}
 
   async findAll({ username, take, skip }): Promise<Array<User>> {
     const users = await this.prismaService.user.findMany({
@@ -33,12 +42,7 @@ export class UsersService {
     return user;
   }
 
-  async update(
-    file: Express.Multer.File,
-    id: string,
-    updateUserDto: UpdateUserDto,
-    currentUser: User,
-  ) {
+  async update({ file, id, updateUserDto, userId }: UpdateParams) {
     const user = await this.findOne(id);
 
     updateUserDto.email = updateUserDto.email
@@ -54,26 +58,14 @@ export class UsersService {
       ? await bcrypt.hash(updateUserDto.password, 10)
       : user.password;
 
-    if (currentUser.id !== id) {
+    if (userId !== id) {
       throw new UnauthorizedException(
         'You are not authorized to update this user',
       );
     }
 
     if (file) {
-      if (file.size > 2000000) {
-        throw new BadRequestException('File is too large');
-      }
-
-      const validFileTypes = ['.png', '.jpeg', '.jpg'];
-      const fileExt = extname(file.originalname).toLowerCase();
-      if (!validFileTypes.includes(fileExt)) {
-        throw new BadRequestException('Invalid file type');
-      }
-
-      const filePath = `/images/avatars/${file.filename}`;
-
-      updateUserDto.avatar = filePath;
+      updateUserDto.avatar = `/images/avatars/${file.filename}`;
     }
 
     const updatedUser = await this.prismaService.user.update({

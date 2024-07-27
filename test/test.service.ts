@@ -3,10 +3,14 @@ import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { User } from '@prisma/client';
 import { RegisterAuthDto } from '../src/auth/dto/register-auth.dto';
+import { UploadImageService } from '../src/common/upload-image.service';
 
 @Injectable()
 export class TestService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private uploadImageService: UploadImageService,
+  ) {}
 
   async deleteUser() {
     await this.prismaService.user.deleteMany({
@@ -32,5 +36,9 @@ export class TestService {
     await this.prismaService.user.create({
       data: user,
     });
+  }
+
+  async deleteImage(fileName) {
+    await this.uploadImageService.deleteFile(fileName);
   }
 }
