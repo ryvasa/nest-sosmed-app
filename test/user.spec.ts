@@ -7,6 +7,7 @@ import { TestService } from './test.service';
 import { TestModule } from './test.module';
 import { HttpExceptionFilter } from '../src/common/http-exception';
 import { GlobalInterceptor } from '../src/interceptors/global.interceptor';
+import { join } from 'path';
 
 describe('Users', () => {
   let app: INestApplication;
@@ -186,6 +187,23 @@ describe('Users', () => {
       });
       expect(response.status).toBe(200);
       expect(response.body.data).toBeDefined();
+    });
+
+    it('should be able to update avatar', async () => {
+      const cookies = await loginAndGetCookie();
+      const user = await testService.getUser();
+      const response = await request(app.getHttpServer())
+        .patch(`/users/${user.id}`)
+        .set('Cookie', cookies)
+        .field('username', 'updated')
+        .attach('avatar', join(__dirname, 'image.png'));
+
+      console.log(response.body);
+      expect(response.status).toBe(200);
+      expect(response.body.data.username).toBeDefined();
+      expect(response.body.data.id).toBeDefined();
+      expect(response.body.data.email).toBeDefined();
+      expect(response.body.data.avatar).toContain('/images/avatars/');
     });
   });
 });

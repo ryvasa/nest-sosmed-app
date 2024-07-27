@@ -54,6 +54,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @ApiResponse({ status: 200, description: 'Current User.' })
+  @ApiOperation({ summary: 'Get Current User' })
   @Get('me')
   async me(@Req() request) {
     return this.authService.me(request.user.id);
@@ -62,6 +63,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @ApiResponse({ status: 200, description: 'Logout success.' })
+  @ApiOperation({ summary: 'User Logout' })
   @Delete('logout')
   async logout(
     @Res({ passthrough: true }) response: Response,

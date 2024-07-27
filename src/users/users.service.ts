@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -7,6 +8,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from '@prisma/client';
 import { PrismaService } from '../common/prisma.service';
 import * as bcrypt from 'bcrypt';
+import { extname } from 'path';
 
 @Injectable()
 export class UsersService {
@@ -31,21 +33,53 @@ export class UsersService {
     return user;
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto, currentUser: User) {
-    await this.findOne(id);
+  async update(
+    file: Express.Multer.File,
+    id: string,
+    updateUserDto: UpdateUserDto,
+    currentUser: User,
+  ) {
+    const user = await this.findOne(id);
+
+    updateUserDto.email = updateUserDto.email
+      ? updateUserDto.email
+      : user.email;
+    updateUserDto.username = updateUserDto.username
+      ? updateUserDto.username
+      : user.username;
+    updateUserDto.avatar = updateUserDto.avatar
+      ? updateUserDto.avatar
+      : user.avatar;
+    updateUserDto.password = updateUserDto.password
+      ? await bcrypt.hash(updateUserDto.password, 10)
+      : user.password;
 
     if (currentUser.id !== id) {
       throw new UnauthorizedException(
         'You are not authorized to update this user',
       );
     }
-    if (updateUserDto.password) {
-      updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
+
+    if (file) {
+      if (file.size > 2000000) {
+        throw new BadRequestException('File is too large');
+      }
+
+      const validFileTypes = ['.png', '.jpeg', '.jpg'];
+      const fileExt = extname(file.originalname).toLowerCase();
+      if (!validFileTypes.includes(fileExt)) {
+        throw new BadRequestException('Invalid file type');
+      }
+
+      const filePath = `/images/avatars/${file.filename}`;
+
+      updateUserDto.avatar = filePath;
     }
-    const user = await this.prismaService.user.update({
+
+    const updatedUser = await this.prismaService.user.update({
       data: updateUserDto,
       where: { id },
     });
-    return user;
+    return updatedUser;
   }
 }
