@@ -10,6 +10,8 @@ import { ImagesModule } from './images/images.module';
 import { DislikeThreadModule } from './dislike-thread/dislike-thread.module';
 import { LikeThreadModule } from './like-thread/like-thread.module';
 import { CommentsModule } from './comments/comments.module';
+import { DislikeCommentModule } from './dislike-comment/dislike-comment.module';
+import { LikeCommentModule } from './like-comment/like-comment.module';
 
 @Module({
   imports: [
@@ -28,6 +30,8 @@ import { CommentsModule } from './comments/comments.module';
     DislikeThreadModule,
     LikeThreadModule,
     CommentsModule,
+    DislikeCommentModule,
+    LikeCommentModule,
   ],
   controllers: [],
   providers: [],

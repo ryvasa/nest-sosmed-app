@@ -79,7 +79,7 @@ export class ThreadsService {
   }
 
   async findOne(id: string): Promise<Thread> {
-    const thread = await this.prismaService.thread.findUnique({
+    const thread = await this.prismaService.thread.findFirst({
       where: { id },
       include: {
         user: { select: { username: true, avatar: true } },

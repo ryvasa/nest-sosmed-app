@@ -102,6 +102,27 @@ export class TestService {
 
     return comment;
   }
+  async createDislikeComment(comentId: string, userId: string) {
+    const dislikeComment = await this.prismaService.comment_Dislike.create({
+      data: {
+        user_id: userId,
+        comment_id: comentId,
+        dislike: true,
+      },
+    });
+    return dislikeComment;
+  }
+
+  async createLikeComment(comentId: string, userId: string) {
+    const dislikeComment = await this.prismaService.comment_Like.create({
+      data: {
+        user_id: userId,
+        comment_id: comentId,
+        like: true,
+      },
+    });
+    return dislikeComment;
+  }
 
   async createDislikeThread(threaId: string, userId: string) {
     return this.prismaService.thread_Dislike.create({
