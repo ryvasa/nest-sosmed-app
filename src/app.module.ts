@@ -7,6 +7,8 @@ import { ThreadsModule } from './threads/threads.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { ImagesModule } from './images/images.module';
+import { DislikeThreadModule } from './dislike-thread/dislike-thread.module';
+import { LikeThreadModule } from './like-thread/like-thread.module';
 
 @Module({
   imports: [
@@ -22,6 +24,8 @@ import { ImagesModule } from './images/images.module';
     AuthModule,
     ThreadsModule,
     ImagesModule,
+    DislikeThreadModule,
+    LikeThreadModule,
   ],
   controllers: [],
   providers: [],

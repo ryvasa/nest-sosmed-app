@@ -7,7 +7,6 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from '@prisma/client';
 import { PrismaService } from '../common/prisma.service';
 import * as bcrypt from 'bcrypt';
-import { UploadImageService } from '../common/upload-image.service';
 
 interface UpdateParams {
   file?: Express.Multer.File; // file adalah opsional
@@ -18,10 +17,7 @@ interface UpdateParams {
 
 @Injectable()
 export class UsersService {
-  constructor(
-    private prismaService: PrismaService,
-    private uploadImageService: UploadImageService,
-  ) {}
+  constructor(private prismaService: PrismaService) {}
 
   async findAll({ username, take, skip }): Promise<Array<User>> {
     const users = await this.prismaService.user.findMany({

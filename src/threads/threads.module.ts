@@ -7,5 +7,6 @@ import { ImagesModule } from '../images/images.module';
   imports: [ImagesModule],
   controllers: [ThreadsController],
   providers: [ThreadsService],
+  exports: [ThreadsService],
 })
 export class ThreadsModule {}

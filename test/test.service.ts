@@ -13,11 +13,11 @@ export class TestService {
   ) {}
 
   async deleteAll() {
-    await this.deleteDislikeComment();
-    await this.deleteLikeComment();
-    await this.deleteComment();
-    await this.deleteDislikeThread();
-    await this.deleteLikeThread();
+    // await this.deleteDislikeComment();
+    // await this.deleteLikeComment();
+    // await this.deleteComment();
+    // await this.deleteDislikeThread();
+    // await this.deleteLikeThread();
     await this.deleteThread();
     await this.deleteUser();
   }
@@ -78,6 +78,26 @@ export class TestService {
     return detailThread;
   }
 
+  async createDislikeThread(threaId, userId) {
+    return this.prismaService.thread_Dislike.create({
+      data: {
+        user_id: userId,
+        thread_id: threaId,
+        dislike: true,
+      },
+    });
+  }
+
+  async createLikeThread(threaId, userId) {
+    return this.prismaService.thread_Like.create({
+      data: {
+        user_id: userId,
+        thread_id: threaId,
+        like: true,
+      },
+    });
+  }
+
   async deleteThread() {
     const thread = await this.prismaService.thread.deleteMany({
       where: {
@@ -92,7 +112,7 @@ export class TestService {
   }
 
   async deleteDislikeThread() {
-    return this.prismaService.thread_Dislike.deleteMany();
+    return this.prismaService.thread_Dislike.deleteMany({});
   }
 
   async deleteComment() {
