@@ -7,7 +7,6 @@ import { TestService } from './test.service';
 import { TestModule } from './test.module';
 import { HttpExceptionFilter } from '../src/common/http-exception';
 import { GlobalInterceptor } from '../src/interceptors/global.interceptor';
-import { join } from 'path';
 
 describe('Threads', () => {
   let app: INestApplication;
@@ -30,28 +29,30 @@ describe('Threads', () => {
   });
 
   const loginAndGetCookie = async () => {
+    const user = await testService.getUser();
+
     const loginResponse = await request(app.getHttpServer())
       .post('/auth/login')
       .send({
         password: 'test',
-        email: 'test@gmail.com',
+        email: user.email,
       });
 
     expect(loginResponse.status).toBe(200);
     return loginResponse.headers['set-cookie'];
   };
 
-  describe('POST /threads', () => {
+  describe('POST /threads/:threadId/comments', () => {
     beforeEach(async () => {
       await testService.deleteAll();
       await testService.createUser();
+      await testService.createThread();
     });
     it('should be rejected if not login', async () => {
+      const thread = await testService.getThread();
       const response = await request(app.getHttpServer())
-        .post(`/threads`)
-        .field('body', 'test')
-        .attach('images', join(__dirname, 'image.png'))
-        .attach('images', join(__dirname, 'image2.png'));
+        .post(`/threads/${thread.id}/comments`)
+        .send({ body: 'test' });
 
       expect(response.status).toBe(401);
       expect(response.body.statusCode).toBeDefined();
@@ -62,10 +63,9 @@ describe('Threads', () => {
 
     it('should be rejected if body is invalid', async () => {
       const cookies = await loginAndGetCookie();
+      const thread = await testService.getThread();
       const response = await request(app.getHttpServer())
-        .post(`/threads`)
-        .attach('images', join(__dirname, 'image.png'))
-        .attach('images', join(__dirname, 'image2.png'))
+        .post(`/threads/${thread.id}/comments`)
         .set('Cookie', cookies);
 
       expect(response.status).toBe(400);
@@ -75,134 +75,38 @@ describe('Threads', () => {
       expect(response.body.message).toBeDefined();
     });
 
-    it('should be rejected if image is invalid', async () => {
+    it('should be rejected if thread not found', async () => {
       const cookies = await loginAndGetCookie();
+      const thread = await testService.getThread();
       const response = await request(app.getHttpServer())
-        .post(`/threads`)
-        .field('body', 'test')
-        .attach('images', join(__dirname, 'user.spec.ts'))
+        .post(`/threads/${thread.id}l/comments`)
+        .send({ body: 'test' })
         .set('Cookie', cookies);
 
-      expect(response.status).toBe(400);
+      expect(response.status).toBe(404);
       expect(response.body.statusCode).toBeDefined();
       expect(response.body.timestamp).toBeDefined();
       expect(response.body.path).toBeDefined();
       expect(response.body.message).toBeDefined();
     });
 
-    it('should be able to create thread with image', async () => {
+    it('should be able to create comment', async () => {
       const cookies = await loginAndGetCookie();
+      const thread = await testService.getThread();
       const response = await request(app.getHttpServer())
-        .post(`/threads`)
-        .field('body', 'test')
-        .attach('images', join(__dirname, 'image.png'))
-        .attach('images', join(__dirname, 'image2.png'))
+        .post(`/threads/${thread.id}/comments`)
+        .send({ body: 'test' })
         .set('Cookie', cookies);
 
       expect(response.status).toBe(201);
       expect(response.body.data.id).toBeDefined();
       expect(response.body.data.body).toBe('test');
-      expect(response.body.data.images.length).toBeGreaterThan(0);
-      expect(response.body.data.user).toBeDefined();
-      expect(response.body.data.count).toBeDefined();
-      expect(response.body.data.created_at).toBeDefined();
-
-      response.body.data.images.forEach(async (image) => {
-        await testService.deleteImage(image.image);
-      });
-    });
-
-    it('should be able to create thread without image', async () => {
-      const cookies = await loginAndGetCookie();
-      const response = await request(app.getHttpServer())
-        .post(`/threads`)
-        .field('body', 'test')
-        .set('Cookie', cookies);
-
-      expect(response.status).toBe(201);
-      expect(response.body.data.id).toBeDefined();
-      expect(response.body.data.body).toBe('test');
-      expect(response.body.data.images.length).toBe(0);
       expect(response.body.data.user).toBeDefined();
       expect(response.body.data.count).toBeDefined();
       expect(response.body.data.created_at).toBeDefined();
     });
   });
-  describe('GET /threads', () => {
-    beforeEach(async () => {
-      await testService.deleteAll();
-      await testService.createUser();
-      await testService.createThread();
-    });
-    it('should be rejected if not logged in', async () => {
-      const response = await request(app.getHttpServer()).get('/threads');
-
-      expect(response.status).toBe(401);
-      expect(response.body.statusCode).toBeDefined();
-      expect(response.body.timestamp).toBeDefined();
-      expect(response.body.path).toBeDefined();
-      expect(response.body.message).toBeDefined();
-    });
-
-    it('should be able to get threads', async () => {
-      const cookies = await loginAndGetCookie();
-
-      const response = await request(app.getHttpServer())
-        .get('/threads')
-        .set('Cookie', cookies);
-
-      expect(response.status).toBe(200);
-      expect(response.body.data.length).toBeGreaterThan(0);
-    });
-
-    it('should be able to search thread by body not found', async () => {
-      const cookies = await loginAndGetCookie();
-
-      const response = await request(app.getHttpServer())
-        .get(`/threads`)
-        .query({
-          body: 'notfound',
-        })
-        .set('Cookie', cookies);
-
-      expect(response.status).toBe(200);
-      expect(response.body.data.length).toBe(0);
-    });
-
-    it('should be able to search thread by body', async () => {
-      const cookies = await loginAndGetCookie();
-      await testService.createThread();
-
-      const response = await request(app.getHttpServer())
-        .get(`/threads`)
-        .query({
-          username: 'test',
-        })
-        .set('Cookie', cookies);
-
-      expect(response.status).toBe(200);
-      expect(response.body.data.length).toBeGreaterThan(0);
-    });
-
-    it('should be able to search thread with page', async () => {
-      const cookies = await loginAndGetCookie();
-      await testService.createThread();
-
-      const response = await request(app.getHttpServer())
-        .get(`/threads`)
-        .query({
-          take: 1,
-          skip: 0,
-          body: 'test',
-        })
-        .set('Cookie', cookies);
-
-      expect(response.status).toBe(200);
-      expect(response.body.data.length).toBeGreaterThan(0);
-    });
-  });
-
-  describe('GET /threads/threadId', () => {
+  describe('GET /threads/:threadId/comments', () => {
     beforeEach(async () => {
       await testService.deleteAll();
       await testService.createUser();
@@ -210,8 +114,9 @@ describe('Threads', () => {
     });
     it('should be rejected if not logged in', async () => {
       const thread = await testService.getThread();
-      const response = await request(app.getHttpServer()).delete(
-        `/threads/${thread.id}`,
+      await testService.createComment();
+      const response = await request(app.getHttpServer()).get(
+        `/threads/${thread.id}/comments`,
       );
 
       expect(response.status).toBe(401);
@@ -220,11 +125,55 @@ describe('Threads', () => {
       expect(response.body.path).toBeDefined();
       expect(response.body.message).toBeDefined();
     });
-    it('should be reject if thread not found', async () => {
+
+    it('should be reject if thread not found ', async () => {
       const cookies = await loginAndGetCookie();
+      await testService.createComment();
       const thread = await testService.getThread();
+
       const response = await request(app.getHttpServer())
-        .delete(`/threads/${thread.id + 1}`)
+        .get(`/threads/${thread.id + 1}/comments`)
+        .set('Cookie', cookies);
+      expect(response.status).toBe(404);
+      expect(response.body.statusCode).toBeDefined();
+      expect(response.body.timestamp).toBeDefined();
+      expect(response.body.path).toBeDefined();
+      expect(response.body.message).toBeDefined();
+    });
+    it('should be able to get comments from a thread', async () => {
+      const cookies = await loginAndGetCookie();
+      await testService.createComment();
+      const thread = await testService.getThread();
+
+      const response = await request(app.getHttpServer())
+        .get(`/threads/${thread.id}/comments`)
+        .set('Cookie', cookies);
+
+      expect(response.status).toBe(200);
+      expect(response.body.data.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe('GET /threads/:threadId/comments/:commentId', () => {
+    beforeEach(async () => {
+      await testService.deleteAll();
+      await testService.createUser();
+    });
+    it('should be rejected if not logged in', async () => {
+      const response = await request(app.getHttpServer()).get(
+        '/threads/:threadId/comments/:commentId',
+      );
+
+      expect(response.status).toBe(401);
+      expect(response.body.statusCode).toBeDefined();
+      expect(response.body.timestamp).toBeDefined();
+      expect(response.body.path).toBeDefined();
+      expect(response.body.message).toBeDefined();
+    });
+    it('should be send not found error', async () => {
+      const cookies = await loginAndGetCookie();
+      const response = await request(app.getHttpServer())
+        .get(`/threads/:threadId/comments/:commentId`)
         .set('Cookie', cookies);
       expect(response.status).toBe(404);
       expect(response.body.statusCode).toBeDefined();
@@ -233,34 +182,35 @@ describe('Threads', () => {
       expect(response.body.message).toBeDefined();
     });
 
-    it('should be able to get a thread', async () => {
+    it('should be able to get a comment', async () => {
       const cookies = await loginAndGetCookie();
-      const thread = await testService.getThread();
+      const thread = await testService.createThread();
+      const comment = await testService.createComment();
       const response = await request(app.getHttpServer())
-        .get(`/threads/${thread.id}`)
+        .get(`/threads/${thread.id}/comments/${comment.id}`)
         .set('Cookie', cookies);
 
       expect(response.status).toBe(200);
       expect(response.body.data.id).toBeDefined();
       expect(response.body.data.body).toBeDefined();
-      expect(response.body.data.images).toBeDefined();
       expect(response.body.data.user).toBeDefined();
       expect(response.body.data.count).toBeDefined();
       expect(response.body.data.created_at).toBeDefined();
     });
   });
 
-  describe('PATCH /threads/threadId', () => {
+  describe('PATCH /threads/:threadId/comments/:commentId', () => {
     beforeEach(async () => {
       await testService.deleteAll();
       await testService.createUser();
       await testService.createThread();
+      await testService.createComment();
     });
     it('should be rejected if not login', async () => {
-      await loginAndGetCookie();
       const thread = await testService.getThread();
+      const comment = await testService.getComment();
       const response = await request(app.getHttpServer())
-        .patch(`/threads/${thread.id}`)
+        .patch(`/threads/${thread.id}/comments/${comment.id}`)
         .send({
           body: '',
         });
@@ -271,26 +221,59 @@ describe('Threads', () => {
       expect(response.body.path).toBeDefined();
       expect(response.body.message).toBeDefined();
     });
-    it('should be rejected if thread user and request user is not same', async () => {
-      const thread = await testService.getThread();
-      const response = await request(app.getHttpServer())
-        .patch(`/threads/${thread.id}`)
-        .field('body', 'updated')
-        .attach('images', join(__dirname, 'image.png'))
-        .set('Cookie', 'fake_cookies');
+    it('should be reject notfound comment', async () => {
+      const thread = await testService.createThread();
+      const cookies = await loginAndGetCookie();
+      const comment = await testService.createComment();
 
+      const response = await request(app.getHttpServer())
+        .patch(`/threads/${thread.id}/comments/${comment.id + 1}`)
+        .send({
+          body: 'updated',
+        })
+        .set('Cookie', cookies);
+      expect(response.status).toBe(404);
+      expect(response.body.statusCode).toBeDefined();
+      expect(response.body.timestamp).toBeDefined();
+      expect(response.body.path).toBeDefined();
+      expect(response.body.message).toBeDefined();
+    });
+
+    it('should be reject notfound thread', async () => {
+      const thread = await testService.createThread();
+      const comment = await testService.createComment();
+      const cookies = await loginAndGetCookie();
+      const response = await request(app.getHttpServer())
+        .patch(`/threads/${thread.id + 1}/comments/${comment.id}`)
+        .send({
+          body: 'updated',
+        })
+        .set('Cookie', cookies);
+      expect(response.status).toBe(404);
+      expect(response.body.statusCode).toBeDefined();
+      expect(response.body.timestamp).toBeDefined();
+      expect(response.body.path).toBeDefined();
+      expect(response.body.message).toBeDefined();
+    });
+
+    it('should be rejected if thread user and request user is not same', async () => {
+      const thread = await testService.createThread();
+      const comment = await testService.createComment();
+      const response = await request(app.getHttpServer())
+        .patch(`/threads/${thread.id}/comments/${comment.id}`)
+        .set('Cookie', 'wrong_cookies');
       expect(response.status).toBe(401);
       expect(response.body.statusCode).toBeDefined();
       expect(response.body.timestamp).toBeDefined();
       expect(response.body.path).toBeDefined();
       expect(response.body.message).toBeDefined();
     });
-    it('should be rejected if images is invalid', async () => {
+    it('should be rejected if body is invalid', async () => {
       const cookies = await loginAndGetCookie();
       const thread = await testService.getThread();
+      const comment = await testService.getComment();
       const response = await request(app.getHttpServer())
-        .patch(`/threads/${thread.id}`)
-        .attach('images', join(__dirname, 'user.spec.ts'))
+        .patch(`/threads/${thread.id}/comments/${comment.id}`)
         .set('Cookie', cookies);
 
       expect(response.status).toBe(400);
@@ -303,58 +286,37 @@ describe('Threads', () => {
     it('should be able to update body', async () => {
       const cookies = await loginAndGetCookie();
       const thread = await testService.getThread();
-
-      expect(thread.body).toBe('test');
+      const comment = await testService.getComment();
+      expect(comment.body).toBe('test');
 
       const response = await request(app.getHttpServer())
-        .patch(`/threads/${thread.id}`)
-        .field('body', 'updated')
+        .patch(`/threads/${thread.id}/comments/${comment.id}`)
+        .send({
+          body: 'updated',
+        })
         .set('Cookie', cookies);
 
       expect(response.status).toBe(200);
       expect(response.body.data.id).toBeDefined();
       expect(response.body.data.body).toBe('updated');
-      expect(response.body.data.images).toBeDefined();
       expect(response.body.data.user).toBeDefined();
       expect(response.body.data.count).toBeDefined();
       expect(response.body.data.created_at).toBeDefined();
-    });
-
-    it('should be able to update images', async () => {
-      const cookies = await loginAndGetCookie();
-      const thread = await testService.getThread();
-      expect(thread.images.length).toBe(0);
-
-      const response = await request(app.getHttpServer())
-        .patch(`/threads/${thread.id}`)
-        .set('Cookie', cookies)
-        .field('body', 'updated')
-        .attach('images', join(__dirname, 'image.png'));
-
-      expect(response.status).toBe(200);
-      expect(response.body.data.id).toBeDefined();
-      expect(response.body.data.body).toBe('updated');
-      expect(response.body.data.images.length).toBeGreaterThan(0);
-      expect(response.body.data.user).toBeDefined();
-      expect(response.body.data.count).toBeDefined();
-      expect(response.body.data.created_at).toBeDefined();
-
-      response.body.data.images.forEach(async (image) => {
-        await testService.deleteImage(image.image);
-      });
     });
   });
 
-  describe('DELETE /threads/threadId', () => {
+  describe('DELETE /threads/:threadId/comments/:commentId', () => {
     beforeEach(async () => {
       await testService.deleteAll();
       await testService.createUser();
       await testService.createThread();
     });
     it('should be rejected if not logged in', async () => {
-      const thread = await testService.getThread();
+      const thread = await testService.createThread();
+      const comment = await testService.createComment();
+
       const response = await request(app.getHttpServer()).delete(
-        `/threads/${thread.id}`,
+        `/threads/${thread.id}/comments/${comment.id}`,
       );
 
       expect(response.status).toBe(401);
@@ -364,23 +326,13 @@ describe('Threads', () => {
       expect(response.body.message).toBeDefined();
     });
 
-    it('should be rejected if thread user and request user is not same', async () => {
-      const thread = await testService.getThread();
-      const response = await request(app.getHttpServer())
-        .delete(`/threads/${thread.id}`)
-        .set('Cookie', 'fake_cookies');
-
-      expect(response.status).toBe(401);
-      expect(response.body.statusCode).toBeDefined();
-      expect(response.body.timestamp).toBeDefined();
-      expect(response.body.path).toBeDefined();
-      expect(response.body.message).toBeDefined();
-    });
-    it('should be rejected if thread not found ', async () => {
+    it('should be reject notfound comment', async () => {
+      const thread = await testService.createThread();
       const cookies = await loginAndGetCookie();
-      const thread = await testService.getThread();
+      const comment = await testService.createComment();
+
       const response = await request(app.getHttpServer())
-        .delete(`/threads/${thread.id + 1}`)
+        .delete(`/threads/${thread.id}/comments/${comment.id + 1}`)
         .set('Cookie', cookies);
       expect(response.status).toBe(404);
       expect(response.body.statusCode).toBeDefined();
@@ -389,11 +341,39 @@ describe('Threads', () => {
       expect(response.body.message).toBeDefined();
     });
 
-    it('should be able to delete a thread', async () => {
+    it('should be reject notfound thread', async () => {
+      const thread = await testService.createThread();
+      const comment = await testService.createComment();
       const cookies = await loginAndGetCookie();
-      const thread = await testService.getThread();
       const response = await request(app.getHttpServer())
-        .delete(`/threads/${thread.id}`)
+        .delete(`/threads/${thread.id + 1}/comments/${comment.id}`)
+        .set('Cookie', cookies);
+      expect(response.status).toBe(404);
+      expect(response.body.statusCode).toBeDefined();
+      expect(response.body.timestamp).toBeDefined();
+      expect(response.body.path).toBeDefined();
+      expect(response.body.message).toBeDefined();
+    });
+
+    it('should be rejected if thread user and request user is not same', async () => {
+      const thread = await testService.createThread();
+      const comment = await testService.createComment();
+      const response = await request(app.getHttpServer())
+        .delete(`/threads/${thread.id}/comments/${comment.id}`)
+        .set('Cookie', 'wrong_cookies');
+      expect(response.status).toBe(401);
+      expect(response.body.statusCode).toBeDefined();
+      expect(response.body.timestamp).toBeDefined();
+      expect(response.body.path).toBeDefined();
+      expect(response.body.message).toBeDefined();
+    });
+    it('should be able to delete a comment', async () => {
+      const cookies = await loginAndGetCookie();
+      const thread = await testService.createThread();
+      const comment = await testService.createComment();
+
+      const response = await request(app.getHttpServer())
+        .delete(`/threads/${thread.id}/comments/${comment.id}`)
         .set('Cookie', cookies);
 
       expect(response.status).toBe(200);

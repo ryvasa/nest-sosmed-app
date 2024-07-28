@@ -13,11 +13,6 @@ export class TestService {
   ) {}
 
   async deleteAll() {
-    // await this.deleteDislikeComment();
-    // await this.deleteLikeComment();
-    // await this.deleteComment();
-    // await this.deleteDislikeThread();
-    // await this.deleteLikeThread();
     await this.deleteThread();
     await this.deleteUser();
   }
@@ -48,10 +43,10 @@ export class TestService {
     });
   }
 
-  async getThread(id: string) {
+  async getThread() {
     return this.prismaService.thread.findFirst({
       where: {
-        id,
+        body: 'test',
       },
       include: {
         user: { select: { username: true, avatar: true } },
@@ -68,17 +63,47 @@ export class TestService {
   }
   async createThread() {
     const user = await this.getUser();
-    const thread = await this.prismaService.thread.create({
+    await this.prismaService.thread.create({
       data: {
         user_id: user.id,
         body: 'test',
       },
     });
-    const detailThread = await this.getThread(thread.id);
+    const detailThread = await this.getThread();
     return detailThread;
   }
 
-  async createDislikeThread(threaId, userId) {
+  async getComment() {
+    return this.prismaService.comment.findFirst({
+      where: {
+        body: 'test',
+      },
+      include: {
+        user: { select: { id: true, username: true, avatar: true } },
+        _count: {
+          select: {
+            comment_likes: true,
+            comment_dislikes: true,
+          },
+        },
+      },
+    });
+  }
+  async createComment() {
+    const user = await this.getUser();
+    const thread = await this.getThread();
+    const comment = await this.prismaService.comment.create({
+      data: {
+        user_id: user.id,
+        thread_id: thread.id,
+        body: 'test',
+      },
+    });
+
+    return comment;
+  }
+
+  async createDislikeThread(threaId: string, userId: string) {
     return this.prismaService.thread_Dislike.create({
       data: {
         user_id: userId,
@@ -88,7 +113,7 @@ export class TestService {
     });
   }
 
-  async createLikeThread(threaId, userId) {
+  async createLikeThread(threaId: string, userId: string) {
     return this.prismaService.thread_Like.create({
       data: {
         user_id: userId,
@@ -107,26 +132,7 @@ export class TestService {
     return thread;
   }
 
-  async deleteLikeThread() {
-    return this.prismaService.thread_Like.deleteMany();
-  }
-
-  async deleteDislikeThread() {
-    return this.prismaService.thread_Dislike.deleteMany({});
-  }
-
-  async deleteComment() {
-    return this.prismaService.comment.deleteMany();
-  }
-  async deleteLikeComment() {
-    return this.prismaService.comment_Like.deleteMany();
-  }
-
-  async deleteDislikeComment() {
-    return this.prismaService.comment_Dislike.deleteMany();
-  }
-
-  async deleteImage(fileName) {
+  async deleteImage(fileName: string) {
     await this.uploadImageService.deleteFile(fileName);
   }
 }

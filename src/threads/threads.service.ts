@@ -89,7 +89,6 @@ export class ThreadsService {
             id: true,
             body: true,
             created_at: true,
-            updated_at: true,
             user: { select: { username: true, avatar: true } },
             _count: { select: { comment_dislikes: true, comment_likes: true } },
           },

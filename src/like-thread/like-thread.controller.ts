@@ -27,7 +27,7 @@ export class LikeThreadController {
   @ApiResponse({ status: 200, description: 'Delete like thread.' })
   @ApiResponse({ status: 404, description: 'Not found.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  @ApiOperation({ summary: 'Like a Thread' })
+  @ApiOperation({ summary: 'Delete Like a Thread' })
   @Delete()
   remove(@Req() request, @Param('id') id: string) {
     return this.likeThreadService.remove(request.user.id, id);

@@ -27,7 +27,7 @@ export class DislikeThreadController {
   @ApiResponse({ status: 200, description: 'Delete dislike thread.' })
   @ApiResponse({ status: 404, description: 'Not found.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  @ApiOperation({ summary: 'Dislike a Thread' })
+  @ApiOperation({ summary: 'Delete Dislike a Thread' })
   @Delete()
   remove(@Req() request, @Param('id') id: string) {
     return this.dislikeThreadService.remove(request.user.id, id);

@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { map, Observable } from 'rxjs';
 @Injectable()
-export class ThreadInterceptor implements NestInterceptor {
+export class CommentInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, handler: CallHandler): Observable<any> {
     return handler.handle().pipe(
       map((data) => {
@@ -17,8 +17,11 @@ export class ThreadInterceptor implements NestInterceptor {
             id: item.id,
             body: item.body,
             created_at: item.created_at,
-            user: item.user,
-            images: item.images,
+            user: {
+              id: item.user.id,
+              avatar: item.user.avatar,
+              username: item.user.username,
+            },
             count: item._count,
           }));
         } else {
@@ -26,9 +29,11 @@ export class ThreadInterceptor implements NestInterceptor {
             id: data.id,
             body: data.body,
             created_at: data.created_at,
-            user: data.user,
-            images: data.images,
-            comments: data.comments,
+            user: {
+              id: data.user.id,
+              avatar: data.user.avatar,
+              username: data.user.username,
+            },
             count: data._count,
           };
           return res;

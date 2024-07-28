@@ -9,6 +9,7 @@ import { join } from 'path';
 import { ImagesModule } from './images/images.module';
 import { DislikeThreadModule } from './dislike-thread/dislike-thread.module';
 import { LikeThreadModule } from './like-thread/like-thread.module';
+import { CommentsModule } from './comments/comments.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { LikeThreadModule } from './like-thread/like-thread.module';
     ImagesModule,
     DislikeThreadModule,
     LikeThreadModule,
+    CommentsModule,
   ],
   controllers: [],
   providers: [],
