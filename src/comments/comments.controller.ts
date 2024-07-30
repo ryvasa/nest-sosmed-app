@@ -32,7 +32,7 @@ export class CommentsController {
   @Post()
   create(
     @Param('threadId') threadId: string,
-    @Req() request,
+    @Req() request: any,
     @Body() createCommentDto: CreateCommentDto,
   ) {
     return this.commentsService.create(
@@ -73,7 +73,7 @@ export class CommentsController {
   update(
     @Param('threadId') threadId: string,
     @Param('commentId') commentId: string,
-    @Req() request,
+    @Req() request: any,
     @Body() updateCommentDto: UpdateCommentDto,
   ) {
     return this.commentsService.update({
@@ -92,7 +92,7 @@ export class CommentsController {
   remove(
     @Param('commentId') commentId: string,
     @Param('threadId') threadId: string,
-    @Req() request,
+    @Req() request: any,
   ) {
     return this.commentsService.remove(commentId, request.user.id, threadId);
   }

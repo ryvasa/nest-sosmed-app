@@ -15,14 +15,15 @@ model User {
   avatar        String?
   created_at    DateTime       @default(now())
   updated_at    DateTime       @updatedAt
-  chats         Chat[]
+  sentMessages Message[] @relation("SenderMessages")
+  receivedMessages Message[] @relation("ReceiverMessages")
   comment_likes Comment_Like[]
   comment_dislikes Comment_Dislike[]
-  rooms         Room[]
   comments      Comment[]
   thread_likes  Thread_Like[]
   thread_dislikes Thread_Dislike[]
   threads       Thread[]
+  chats      ChatUser[]   
 
   @@map("users")
 }
@@ -118,27 +119,39 @@ model Comment_Dislike {
   @@map("comment_dislikes")
 }
 
-model Chat {
+model Message {
   id         String   @id @unique @default(uuid())
-  room_id    String
-  user_id    String?
+  chat_id    String
+  sender_id    String?
+  receiver_id    String?
   message    String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
-  room       Room     @relation(fields: [room_id], references: [id])
-  user       User?     @relation(fields: [user_id], references: [id],onDelete: SetNull)
+  chat       Chat     @relation(fields: [chat_id], references: [id])
+  sender     User?    @relation("SenderMessages", fields: [sender_id], references: [id], onDelete: SetNull)
+  receiver   User?    @relation("ReceiverMessages", fields: [receiver_id], references: [id], onDelete: SetNull)
 
-  @@map("chats")
 
+  @@map("messages")
 }
 
-model Room {
+model Chat {
   id         String   @id @unique @default(uuid())
-  user_id    String?
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
-  chat       Chat[]
-  user       User?     @relation(fields: [user_id], references: [id],onDelete: SetNull)
+  messages      Message[]
+  users      ChatUser[]  
+  
+  @@map("chats")
+}
 
-  @@map("rooms")
+model ChatUser {
+  chat_id  String 
+  user_id  String
+
+  chat    Chat   @relation(fields: [chat_id], references: [id])
+  user    User   @relation(fields: [user_id], references: [id])
+  
+  @@id([chat_id, user_id])
+  @@map("chat_users")
 }

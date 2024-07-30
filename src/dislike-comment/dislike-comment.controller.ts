@@ -21,7 +21,7 @@ export class DislikeCommentController {
   @ApiOperation({ summary: 'Dislike a Thread' })
   @Post()
   create(
-    @Req() request,
+    @Req() request: any,
     @Param('threadId') threadId: string,
     @Param('commentId') commentId: string,
   ) {
@@ -38,7 +38,7 @@ export class DislikeCommentController {
   @ApiOperation({ summary: 'Delete Dislike a Thread' })
   @Delete()
   remove(
-    @Req() request,
+    @Req() request: any,
     @Param('threadId') threadId: string,
     @Param('commentId') commentId: string,
   ) {

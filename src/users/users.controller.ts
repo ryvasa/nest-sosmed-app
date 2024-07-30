@@ -103,7 +103,7 @@ export class UsersController {
     file: Express.Multer.File,
     @Param('id')
     id: string,
-    @Req() request,
+    @Req() request: any,
     @Body() updateUserDto: UpdateUserDto,
   ) {
     return this.usersService.update({

@@ -73,7 +73,7 @@ export class ThreadsController {
       }),
     )
     files: Express.Multer.File[],
-    @Req() request,
+    @Req() request: any,
     @Body() createThreadDto: CreateThreadDto,
   ) {
     return this.threadsService.create(files, request.user.id, createThreadDto);
@@ -145,7 +145,7 @@ export class ThreadsController {
     files: Express.Multer.File[],
     @Param('id') id: string,
     @Body() updateThreadDto: UpdateThreadDto,
-    @Req() request,
+    @Req() request: any,
   ) {
     return this.threadsService.update({
       files,
@@ -160,7 +160,7 @@ export class ThreadsController {
   @ApiOperation({ summary: 'Delete Thread By Id' })
   @ApiParam({ name: 'id' })
   @Delete(':id')
-  remove(@Param('id') id: string, @Req() request) {
+  remove(@Param('id') id: string, @Req() request: any) {
     return this.threadsService.remove(id, request.user.id);
   }
 }

@@ -8,7 +8,7 @@ import { HttpExceptionFilter } from './common/http-exception';
 import { GlobalInterceptor } from './interceptors/global.interceptor';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { cors: true });
+  const app = await NestFactory.create(AppModule);
 
   const config = new DocumentBuilder()
     .setTitle('Cats example')
@@ -18,12 +18,17 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
+  app.use(cookieParser());
+  app.enableCors({
+    origin: 'http://localhost:3001',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
+  });
+
   app.use(passport.initialize());
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalInterceptors(new GlobalInterceptor());
-  app.enableCors();
-  app.use(cookieParser());
 
   await app.listen(3000);
 }

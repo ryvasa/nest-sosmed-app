@@ -47,7 +47,11 @@ export class AuthController {
   })
   @ApiResponse({ status: 401, description: 'Wrong password.' })
   @ApiResponse({ status: 200, description: 'Login User.' })
-  login(@Body() loginAuthDto: LoginAuthDto, @Req() req, @Res() res: Response) {
+  login(
+    @Body() loginAuthDto: LoginAuthDto,
+    @Req() req: any,
+    @Res() res: Response,
+  ) {
     return this.authService.login(req.user, res);
   }
 
@@ -56,7 +60,7 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Current User.' })
   @ApiOperation({ summary: 'Get Current User' })
   @Get('me')
-  async me(@Req() request) {
+  async me(@Req() request: any) {
     return this.authService.me(request.user.id);
   }
 

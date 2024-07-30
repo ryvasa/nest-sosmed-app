@@ -20,7 +20,7 @@ export class LikeThreadController {
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @ApiOperation({ summary: 'Like a Thread' })
   @Post()
-  create(@Req() request, @Param('id') id: string) {
+  create(@Req() request: any, @Param('id') id: string) {
     return this.likeThreadService.create(request.user.id, id);
   }
 
@@ -29,7 +29,7 @@ export class LikeThreadController {
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @ApiOperation({ summary: 'Delete Like a Thread' })
   @Delete()
-  remove(@Req() request, @Param('id') id: string) {
+  remove(@Req() request: any, @Param('id') id: string) {
     return this.likeThreadService.remove(request.user.id, id);
   }
 }

@@ -21,7 +21,7 @@ export class LikeCommentController {
   @ApiOperation({ summary: 'Like a Comment' })
   @Post()
   create(
-    @Req() request,
+    @Req() request: any,
     @Param('threadId') threadId: string,
     @Param('commentId') commentId: string,
   ) {
@@ -38,7 +38,7 @@ export class LikeCommentController {
   @ApiOperation({ summary: 'Delete like a Thread' })
   @Delete()
   remove(
-    @Req() request,
+    @Req() request: any,
     @Param('threadId') threadId: string,
     @Param('commentId') commentId: string,
   ) {
