@@ -9,9 +9,9 @@ import { CreateMessageDto } from './dto/create-message.dto';
 import { UpdateMessageDto } from './dto/update-message.sto';
 
 interface MessageParams {
-  senderId: string;
-  receiverId: string;
-  chatId: string;
+  sender_id: string;
+  receiver_id: string;
+  chat_id: string;
 }
 
 @Injectable()
@@ -22,21 +22,19 @@ export class MessagesService {
   ) {}
 
   async create(
-    { senderId, receiverId, chatId }: MessageParams,
+    { sender_id, receiver_id, chat_id }: MessageParams,
     createMessageDto: CreateMessageDto,
   ) {
-    await this.chatService.findOne(chatId);
-    console.log(createMessageDto);
+    await this.chatService.findOne(chat_id);
 
     const message = await this.prisma.message.create({
       data: {
         message: createMessageDto.message,
-        sender_id: senderId,
-        receiver_id: receiverId,
-        chat_id: chatId,
+        sender_id,
+        receiver_id,
+        chat_id,
       },
     });
-    console.log(message);
     return message;
   }
 
@@ -85,5 +83,16 @@ export class MessagesService {
       },
     });
     return { message: 'Message deleted' };
+  }
+
+  async setReadedMessages(chatId: string) {
+    await this.prisma.message.updateMany({
+      where: {
+        chat_id: chatId,
+      },
+      data: {
+        readed: true,
+      },
+    });
   }
 }

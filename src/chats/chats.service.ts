@@ -28,8 +28,26 @@ export class ChatsService {
       where: {
         users: { some: { user_id: userId } },
       },
-      include: {
-        users: true,
+      select: {
+        id: true,
+        users: {
+          select: {
+            user: {
+              select: { username: true, avatar: true, id: true },
+            },
+          },
+        },
+        _count: {
+          select: {
+            messages: {
+              where: { readed: false },
+            },
+          },
+        },
+        messages: {
+          orderBy: { created_at: 'desc' },
+          take: 1,
+        },
       },
     });
     return chats;

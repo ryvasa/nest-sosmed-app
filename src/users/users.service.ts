@@ -70,4 +70,25 @@ export class UsersService {
     });
     return updatedUser;
   }
+
+  async setActiveToUser(userId: string) {
+    await this.findOne(userId);
+    const updatedUser = await this.prismaService.user.update({
+      where: { id: userId },
+      data: {
+        active: true,
+      },
+    });
+    return updatedUser;
+  }
+  async setNonActiveToUser(userId: string) {
+    await this.findOne(userId);
+    const updatedUser = await this.prismaService.user.update({
+      where: { id: userId },
+      data: {
+        active: false,
+      },
+    });
+    return updatedUser;
+  }
 }
