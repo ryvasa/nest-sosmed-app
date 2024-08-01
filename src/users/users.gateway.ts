@@ -25,6 +25,7 @@ export class UsersGateway {
   async handleSetActive(@ConnectedSocket() socket: Socket) {
     const userId = socket['user']?.id;
     if (userId) {
+      console.log('setActive', userId);
       await this.usersService.setActiveToUser(userId);
       this.server.emit('setactive', { userId, active: true });
       this.resetActivityTimeout(userId);
@@ -45,7 +46,6 @@ export class UsersGateway {
   async handleActiveUser(socket: Socket, userId: string) {
     await this.usersService.setActiveToUser(userId);
     this.server.emit('setactive', { userId, active: true });
-    console.log('first');
 
     // Reset the activity timeout
     this.resetActivityTimeout(userId);

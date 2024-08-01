@@ -7,6 +7,7 @@ import { PrismaService } from '../common/prisma.service';
 import { ChatsService } from '../chats/chats.service';
 import { CreateMessageDto } from './dto/create-message.dto';
 import { UpdateMessageDto } from './dto/update-message.sto';
+import { Message } from '@prisma/client';
 
 interface MessageParams {
   sender_id: string;
@@ -24,7 +25,7 @@ export class MessagesService {
   async create(
     { sender_id, receiver_id, chat_id }: MessageParams,
     createMessageDto: CreateMessageDto,
-  ) {
+  ): Promise<Message> {
     await this.chatService.findOne(chat_id);
 
     const message = await this.prisma.message.create({
@@ -38,7 +39,7 @@ export class MessagesService {
     return message;
   }
 
-  async findOne(messageId: string) {
+  async findOne(messageId: string): Promise<Message> {
     const message = await this.prisma.message.findFirst({
       where: {
         id: messageId,
@@ -50,7 +51,10 @@ export class MessagesService {
     return message;
   }
 
-  async validateAuthorMessage(messageId: string, userId: string) {
+  async validateAuthorMessage(
+    messageId: string,
+    userId: string,
+  ): Promise<void> {
     const message = await this.findOne(messageId);
     if (message.sender_id !== userId) {
       throw new UnauthorizedException(
@@ -63,7 +67,7 @@ export class MessagesService {
     messageId: string,
     userId: string,
     messageBody: UpdateMessageDto,
-  ) {
+  ): Promise<Message> {
     await this.validateAuthorMessage(messageId, userId);
     return this.prisma.message.update({
       where: {
@@ -75,7 +79,7 @@ export class MessagesService {
     });
   }
 
-  async remove(messageId: string, userId: string) {
+  async remove(messageId: string, userId: string): Promise<any> {
     await this.validateAuthorMessage(messageId, userId);
     await this.prisma.message.delete({
       where: {
@@ -85,14 +89,17 @@ export class MessagesService {
     return { message: 'Message deleted' };
   }
 
-  async setReadedMessages(chatId: string) {
-    await this.prisma.message.updateMany({
-      where: {
-        chat_id: chatId,
-      },
-      data: {
-        readed: true,
-      },
-    });
+  async setReadedMessages(chatId: string, userId: string): Promise<void> {
+    const chat = await this.chatService.findOne(chatId);
+    if (chat.messages[chat.messages.length - 1].sender_id !== userId) {
+      await this.prisma.message.updateMany({
+        where: {
+          chat_id: chatId,
+        },
+        data: {
+          readed: true,
+        },
+      });
+    }
   }
 }

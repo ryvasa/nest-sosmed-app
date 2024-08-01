@@ -40,7 +40,7 @@ export class ChatsService {
         _count: {
           select: {
             messages: {
-              where: { readed: false },
+              where: { readed: false, sender_id: { not: userId } },
             },
           },
         },
@@ -67,6 +67,7 @@ export class ChatsService {
     if (!chat) {
       throw new NotFoundException('Chat not found');
     }
+    return chat;
   }
 
   async findOne(chatId: string): Promise<any> {
@@ -76,7 +77,9 @@ export class ChatsService {
       },
       include: {
         users: true,
-        messages: true,
+        messages: {
+          orderBy: { created_at: 'asc' },
+        },
       },
     });
     if (!chat) {

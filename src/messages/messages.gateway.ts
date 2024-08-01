@@ -29,7 +29,9 @@ export class MessagesGateway {
     @ConnectedSocket() socket: Socket,
   ) {
     console.log(`Socket ${socket.id} joined room ${room}`);
-    await this.messagesService.setReadedMessages(room);
+    const userId = socket['user'].id;
+
+    await this.messagesService.setReadedMessages(room, userId);
     socket.join(room);
   }
 
@@ -49,7 +51,7 @@ export class MessagesGateway {
   ): Promise<any> {
     const userId = socket['user'].id;
     const createMessageDto: CreateMessageDto = data;
-    await this.messagesService.create(
+    const createdMessage = await this.messagesService.create(
       {
         sender_id: userId,
         receiver_id: data.receiver_id,
@@ -57,10 +59,10 @@ export class MessagesGateway {
       },
       createMessageDto,
     );
-    const messageToSend = { ...data, sender_id: userId };
-    this.server.to(data.chat_id).emit('messages', messageToSend);
+    console.log(createdMessage);
+    this.server.to(data.chat_id).emit('messages', createdMessage);
 
-    console.log('Message sent:', messageToSend);
-    console.log('Rooms:', this.server.sockets.adapter.rooms);
+    // console.log('Message sent:', messageToSend);
+    // console.log('Rooms:', this.server.sockets.adapter.rooms);
   }
 }
