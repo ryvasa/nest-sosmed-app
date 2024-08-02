@@ -14,6 +14,7 @@ import { DislikeCommentModule } from './dislike-comment/dislike-comment.module';
 import { LikeCommentModule } from './like-comment/like-comment.module';
 import { ChatsModule } from './chats/chats.module';
 import { MessagesModule } from './messages/messages.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { MessagesModule } from './messages/messages.module';
     ChatsModule,
     MessagesModule,
     ChatsModule,
+    NotificationsModule,
   ],
   controllers: [],
   providers: [],

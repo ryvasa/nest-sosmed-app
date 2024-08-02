@@ -75,7 +75,10 @@ export class AuthService {
       id: user.id,
       username: user.username,
     });
-    res.cookie('token', accessToken, { httpOnly: true });
+    res.cookie('token', accessToken, {
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000,
+    });
 
     res.status(200).send({
       data: {

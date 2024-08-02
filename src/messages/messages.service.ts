@@ -94,7 +94,7 @@ export class MessagesService {
     if (chat.messages[chat.messages.length - 1].sender_id !== userId) {
       await this.prisma.message.updateMany({
         where: {
-          chat_id: chatId,
+          AND: [{ chat_id: chatId }, { readed: false }],
         },
         data: {
           readed: true,

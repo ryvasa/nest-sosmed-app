@@ -13,6 +13,7 @@ import { CreateMessageDto } from './dto/create-message.dto';
 
 @UseGuards(WsGuard)
 @WebSocketGateway({
+  namespace: 'messages',
   cors: {
     origin: 'http://localhost:3001',
     credentials: true,
@@ -29,9 +30,6 @@ export class MessagesGateway {
     @ConnectedSocket() socket: Socket,
   ) {
     console.log(`Socket ${socket.id} joined room ${room}`);
-    const userId = socket['user'].id;
-
-    await this.messagesService.setReadedMessages(room, userId);
     socket.join(room);
   }
 
@@ -44,7 +42,7 @@ export class MessagesGateway {
     socket.leave(room);
   }
 
-  @SubscribeMessage('messages')
+  @SubscribeMessage('message')
   async handleMessage(
     @MessageBody() data: any,
     @ConnectedSocket() socket: Socket,
@@ -59,10 +57,32 @@ export class MessagesGateway {
       },
       createMessageDto,
     );
-    console.log(createdMessage);
-    this.server.to(data.chat_id).emit('messages', createdMessage);
+    this.server.to(data.chat_id).emit('notify');
+    this.server.in(data.chat_id).emit('message', createdMessage);
 
     // console.log('Message sent:', messageToSend);
     // console.log('Rooms:', this.server.sockets.adapter.rooms);
+  }
+
+  @SubscribeMessage('readMessage')
+  async handleReadMessage(
+    @MessageBody() room: string,
+    @ConnectedSocket() socket: Socket,
+  ) {
+    console.log(`readed message  room ${room}`);
+    const userId = socket['user'].id;
+    await this.messagesService.setReadedMessages(room, userId);
+    this.server
+      .in(room)
+      .emit('readMessage', { message: 'message readed' + room });
+  }
+
+  @SubscribeMessage('notify')
+  handleNotify(
+    @MessageBody() room: any,
+    @ConnectedSocket() socket: Socket,
+  ): void {
+    console.log(room);
+    this.server.emit('notify', { message: 'hi from room' + room });
   }
 }

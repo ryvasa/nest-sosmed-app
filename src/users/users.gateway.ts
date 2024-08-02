@@ -11,6 +11,7 @@ import { UsersService } from './users.service';
 
 @UseGuards(WsGuard)
 @WebSocketGateway({
+  namespace: 'users',
   cors: {
     origin: 'http://localhost:3001',
     credentials: true,
@@ -35,6 +36,7 @@ export class UsersGateway {
   @SubscribeMessage('disconnect')
   async handleDisconnect(@ConnectedSocket() socket: Socket) {
     const userId = socket['user']?.id;
+    console.log('disconnected', userId);
     if (userId) {
       await this.usersService.setNonActiveToUser(userId);
       this.server.emit('setactive', { userId, active: false });
