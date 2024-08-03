@@ -39,6 +39,26 @@ export class MessagesService {
     return message;
   }
 
+  async findManyByChatId(
+    userid: string,
+    chatId: string,
+    take: number,
+    skip: number,
+  ): Promise<Message[]> {
+    const messages = await this.prisma.message.findMany({
+      where: {
+        AND: {
+          chat_id: chatId,
+          OR: [{ sender_id: userid }, { receiver_id: userid }],
+        },
+      },
+      orderBy: { created_at: 'desc' },
+      take,
+      skip,
+    });
+    return messages;
+  }
+
   async findOne(messageId: string): Promise<Message> {
     const message = await this.prisma.message.findFirst({
       where: {

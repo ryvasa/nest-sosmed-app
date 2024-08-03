@@ -33,7 +33,7 @@ export class ChatsService {
         users: {
           select: {
             user: {
-              select: { username: true, avatar: true, id: true },
+              select: { username: true, avatar: true, id: true, active: true },
             },
           },
         },

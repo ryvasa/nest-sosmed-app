@@ -62,7 +62,9 @@ export class ThreadsService {
         body: { contains: body },
       },
       include: {
-        user: { select: { id: true, username: true, avatar: true } },
+        user: {
+          select: { id: true, username: true, avatar: true, active: true },
+        },
         images: { select: { image: true } },
         _count: {
           select: {
@@ -82,17 +84,8 @@ export class ThreadsService {
     const thread = await this.prismaService.thread.findFirst({
       where: { id },
       include: {
-        user: { select: { username: true, avatar: true } },
+        user: { select: { username: true, avatar: true, active: true } },
         images: { select: { image: true } },
-        comments: {
-          select: {
-            id: true,
-            body: true,
-            created_at: true,
-            user: { select: { username: true, avatar: true } },
-            _count: { select: { comment_dislikes: true, comment_likes: true } },
-          },
-        },
         _count: {
           select: {
             thread_likes: true,

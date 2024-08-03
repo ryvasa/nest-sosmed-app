@@ -4,12 +4,14 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
 import { MessagesService } from './messages.service';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/utils/jwt/jwt.auth.guard';
 import { UpdateMessageDto } from './dto/update-message.sto';
 
@@ -29,7 +31,26 @@ export class MessageController {
   async countUnreaded(@Req() request: any) {
     return this.messageService.findUnreadedMessage(request.user.id);
   }
-
+  @ApiOperation({ summary: 'Get Message by ID' })
+  @ApiResponse({ status: 200, description: 'Message retrieved successfully.' })
+  @ApiResponse({ status: 404, description: 'Message not found.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiQuery({ name: 'take', required: false, type: String })
+  @ApiQuery({ name: 'skip', required: false, type: String })
+  @Get('chats/:id')
+  async findManyByChatId(
+    @Param('id') id: string,
+    @Req() request: any,
+    @Query('take', new ParseIntPipe({ optional: true })) take?: number,
+    @Query('skip', new ParseIntPipe({ optional: true })) skip?: number,
+  ) {
+    return this.messageService.findManyByChatId(
+      request.user.id,
+      id,
+      take,
+      skip,
+    );
+  }
   @ApiOperation({ summary: 'Get Message by ID' })
   @ApiResponse({ status: 200, description: 'Message retrieved successfully.' })
   @ApiResponse({ status: 404, description: 'Message not found.' })

@@ -18,7 +18,7 @@ interface UpdateParams {
 const commentSelect = {
   id: true,
   body: true,
-  user: { select: { id: true, username: true, avatar: true } },
+  user: { select: { id: true, username: true, avatar: true, active: true } },
   created_at: true,
   _count: {
     select: {
@@ -71,6 +71,7 @@ export class CommentsService {
       where: {
         thread_id: threadId,
       },
+      orderBy: { created_at: 'desc' },
       select: commentSelect,
     });
     return comments;

@@ -17,6 +17,7 @@ export class UserInterceptor implements NestInterceptor {
             id: item.id,
             avatar: item.avatar,
             username: item.username,
+            active: item.active,
           }));
         } else {
           const res = {
@@ -24,6 +25,7 @@ export class UserInterceptor implements NestInterceptor {
             avatar: data.avatar,
             email: data.email,
             username: data.username,
+            active: data.active,
           };
           return res;
         }

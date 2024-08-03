@@ -57,6 +57,15 @@ export class UsersController {
       skip: skip || 0,
     });
   }
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({ status: 200, description: 'Get User.' })
+  @ApiResponse({ status: 404, description: 'User NotFound.' })
+  @ApiOperation({ summary: 'Get One User with credential' })
+  @ApiParam({ name: 'id' })
+  @Get(':id')
+  findOne(@Param('id') id) {
+    return this.usersService.findOne(id);
+  }
 
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @ApiResponse({ status: 200, description: 'Update User.' })

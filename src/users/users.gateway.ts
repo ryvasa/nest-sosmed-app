@@ -22,24 +22,24 @@ export class UsersGateway {
   server: Server;
   constructor(private readonly usersService: UsersService) {}
 
-  @SubscribeMessage('setActive')
-  async handleSetActive(@ConnectedSocket() socket: Socket) {
+  @SubscribeMessage('active')
+  async handleActive(@ConnectedSocket() socket: Socket) {
     const userId = socket['user']?.id;
+    console.log('active', userId);
     if (userId) {
-      console.log('setActive', userId);
       await this.usersService.setActiveToUser(userId);
-      this.server.emit('setactive', { userId, active: true });
+      this.server.emit('activeStatus', { userId, active: true });
       this.resetActivityTimeout(userId);
     }
   }
 
-  @SubscribeMessage('disconnect')
-  async handleDisconnect(@ConnectedSocket() socket: Socket) {
+  @SubscribeMessage('inactive')
+  async handleInactive(@ConnectedSocket() socket: Socket) {
     const userId = socket['user']?.id;
     console.log('disconnected', userId);
     if (userId) {
       await this.usersService.setNonActiveToUser(userId);
-      this.server.emit('setactive', { userId, active: false });
+      this.server.emit('activeStatus', { userId, active: false });
     }
   }
 
@@ -47,7 +47,7 @@ export class UsersGateway {
 
   async handleActiveUser(socket: Socket, userId: string) {
     await this.usersService.setActiveToUser(userId);
-    this.server.emit('setactive', { userId, active: true });
+    this.server.emit('activeStatus', { userId, active: true });
 
     // Reset the activity timeout
     this.resetActivityTimeout(userId);
@@ -55,7 +55,7 @@ export class UsersGateway {
 
   async handleInactiveUser(userId: string) {
     await this.usersService.setNonActiveToUser(userId);
-    this.server.emit('setactive', { userId, active: false });
+    this.server.emit('activeStatus', { userId, active: false });
   }
 
   resetActivityTimeout(userId: string) {
