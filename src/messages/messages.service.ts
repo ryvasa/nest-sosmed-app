@@ -102,4 +102,13 @@ export class MessagesService {
       });
     }
   }
+
+  async findUnreadedMessage(userId: string): Promise<any> {
+    const messages = await this.prisma.message.count({
+      where: {
+        AND: [{ readed: false }, { receiver_id: userId }],
+      },
+    });
+    return messages;
+  }
 }

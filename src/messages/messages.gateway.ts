@@ -42,6 +42,15 @@ export class MessagesGateway {
     socket.leave(room);
   }
 
+  // not impleented yet
+  @SubscribeMessage('checkRoom')
+  handleCheckRoom(client: Socket, room: string) {
+    const rooms = Array.from(client.rooms);
+    const inRoom = rooms.includes(room);
+    console.log('roomStatus', { room, inRoom });
+    this.server.emit('roomStatus', { room, inRoom });
+  }
+
   @SubscribeMessage('message')
   async handleMessage(
     @MessageBody() data: any,

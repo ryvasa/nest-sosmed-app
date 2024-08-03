@@ -19,6 +19,17 @@ import { UpdateMessageDto } from './dto/update-message.sto';
 export class MessageController {
   constructor(private readonly messageService: MessagesService) {}
 
+  @ApiOperation({ summary: 'Get Unreaded Message by ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Message cound sended successfully.',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @Get('/unreaded')
+  async countUnreaded(@Req() request: any) {
+    return this.messageService.findUnreadedMessage(request.user.id);
+  }
+
   @ApiOperation({ summary: 'Get Message by ID' })
   @ApiResponse({ status: 200, description: 'Message retrieved successfully.' })
   @ApiResponse({ status: 404, description: 'Message not found.' })
