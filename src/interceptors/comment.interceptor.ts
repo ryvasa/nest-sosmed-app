@@ -12,6 +12,8 @@ export class CommentInterceptor implements NestInterceptor {
       map((data) => {
         if (typeof data === 'string') {
           return { message: data };
+        } else if (typeof data === 'number') {
+          return { count: data };
         } else if (Array.isArray(data)) {
           return data.map((item) => ({
             id: item.id,
@@ -21,6 +23,7 @@ export class CommentInterceptor implements NestInterceptor {
               id: item.user.id,
               avatar: item.user.avatar,
               username: item.user.username,
+              active: item.user.active,
             },
             count: item._count,
           }));
@@ -33,6 +36,7 @@ export class CommentInterceptor implements NestInterceptor {
               id: data.user.id,
               avatar: data.user.avatar,
               username: data.user.username,
+              active: data.user.active,
             },
             count: data._count,
           };

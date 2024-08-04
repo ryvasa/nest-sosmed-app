@@ -65,18 +65,31 @@ export class CommentsService {
     return comment;
   }
 
-  async findAllCommentsThread(threadId: string): Promise<Array<any>> {
+  async findAllCommentsThread(
+    threadId: string,
+    take: number,
+    skip: number,
+  ): Promise<any> {
     await this.threadService.findOne(threadId);
     const comments = await this.prismaService.comment.findMany({
       where: {
         thread_id: threadId,
       },
+      take,
+      skip,
       orderBy: { created_at: 'desc' },
       select: commentSelect,
     });
     return comments;
   }
-
+  async countCommentThread(threadId: string): Promise<number> {
+    await this.threadService.findOne(threadId);
+    return this.prismaService.comment.count({
+      where: {
+        thread_id: threadId,
+      },
+    });
+  }
   async findOne(commentId: string, threadId: string): Promise<any> {
     await this.threadService.findOne(threadId);
     const comment = await this.prismaService.comment.findFirst({

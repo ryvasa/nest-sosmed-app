@@ -9,6 +9,8 @@ import {
   Req,
   UseGuards,
   UseInterceptors,
+  ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
@@ -47,8 +49,20 @@ export class CommentsController {
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @ApiOperation({ summary: 'Send All Comments from a Thread.' })
   @Get()
-  findAll(@Param('threadId') threadId: string) {
-    return this.commentsService.findAllCommentsThread(threadId);
+  findAll(
+    @Param('threadId') threadId: string,
+    @Query('take', new ParseIntPipe({ optional: true })) take?: number,
+    @Query('skip', new ParseIntPipe({ optional: true })) skip?: number,
+  ) {
+    return this.commentsService.findAllCommentsThread(threadId, take, skip);
+  }
+  @ApiResponse({ status: 200, description: 'Send Count Comments.' })
+  @ApiResponse({ status: 404, description: 'Threads Not Found.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiOperation({ summary: 'Send Count Comments from a Thread.' })
+  @Get('count')
+  countComment(@Param('threadId') threadId: string) {
+    return this.commentsService.countCommentThread(threadId);
   }
 
   @ApiResponse({ status: 200, description: 'Send a Comment.' })
