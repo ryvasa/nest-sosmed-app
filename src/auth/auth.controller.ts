@@ -34,8 +34,8 @@ export class AuthController {
     status: 400,
     description: 'Username or email is already in use.',
   })
-  register(@Body() registerterUserDto: RegisterAuthDto) {
-    return this.authService.register(registerterUserDto);
+  register(@Body() registerterUserDto: RegisterAuthDto, @Res() res: Response) {
+    return this.authService.register(registerterUserDto, res);
   }
 
   @UseGuards(LocalAuthGuard)

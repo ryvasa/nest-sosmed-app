@@ -39,7 +39,10 @@ export class AuthService {
     return null;
   }
 
-  async register(registerUserDto: RegisterAuthDto): Promise<User> {
+  async register(
+    registerUserDto: RegisterAuthDto,
+    res: Response,
+  ): Promise<User> {
     if (registerUserDto.confirmPassword !== registerUserDto.password) {
       throw new BadRequestException('Confirm password and password not match.');
     }
@@ -66,6 +69,23 @@ export class AuthService {
     const { confirmPassword, ...data } = registerUserDto;
     const user = await this.prismaService.user.create({
       data,
+    });
+    const accessToken = await this.jwtService.signAsync({
+      id: user.id,
+      username: user.username,
+    });
+    res.cookie('token', accessToken, {
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
+    res.status(200).send({
+      data: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        avatar: user.avatar || '',
+      },
     });
     return user;
   }

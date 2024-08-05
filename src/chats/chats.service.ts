@@ -23,11 +23,13 @@ export class ChatsService {
     return createdchat;
   }
 
-  async findAll(userId: string) {
+  async findAll({ userId, take, skip }) {
     const chats = await this.prismaService.chat.findMany({
       where: {
         users: { some: { user_id: userId } },
       },
+      take,
+      skip,
       select: {
         id: true,
         users: {

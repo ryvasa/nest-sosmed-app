@@ -7,9 +7,11 @@ import {
   Req,
   UseGuards,
   Body,
+  Query,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ChatsService } from './chats.service';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/utils/jwt/jwt.auth.guard';
 import { CreateChatDto } from './dto/create-chat';
 
@@ -36,9 +38,19 @@ export class ChatsController {
     description: 'List of chats retrieved successfully.',
   })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiQuery({ name: 'take', required: false, type: String })
+  @ApiQuery({ name: 'skip', required: false, type: String })
   @Get()
-  findAll(@Req() request: any) {
-    return this.chatsService.findAll(request.user.id);
+  findAll(
+    @Req() request: any,
+    @Query('take', new ParseIntPipe({ optional: true })) take?: number,
+    @Query('skip', new ParseIntPipe({ optional: true })) skip?: number,
+  ) {
+    return this.chatsService.findAll({
+      userId: request.user.id,
+      take: take || 30,
+      skip: skip || 0,
+    });
   }
 
   @ApiOperation({ summary: 'Get Chat by ID' })
