@@ -40,9 +40,11 @@ export class ChatsController {
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @ApiQuery({ name: 'take', required: false, type: String })
   @ApiQuery({ name: 'skip', required: false, type: String })
+  @ApiQuery({ name: 'username', required: false, type: String })
   @Get()
   findAll(
     @Req() request: any,
+    @Query('username') username?: string,
     @Query('take', new ParseIntPipe({ optional: true })) take?: number,
     @Query('skip', new ParseIntPipe({ optional: true })) skip?: number,
   ) {
@@ -50,6 +52,7 @@ export class ChatsController {
       userId: request.user.id,
       take: take || 30,
       skip: skip || 0,
+      username,
     });
   }
 

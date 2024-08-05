@@ -21,7 +21,6 @@ export class NotificationsGateway {
     @MessageBody() room: any,
     @ConnectedSocket() socket: Socket,
   ): void {
-    console.log(room);
     this.server.emit('notify', { message: 'hi from room' + room });
   }
 }
