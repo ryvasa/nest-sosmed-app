@@ -79,7 +79,32 @@ export class ThreadsService {
     });
     return thread;
   }
-
+  async findManyByCreator({ userId, take, skip }): Promise<any> {
+    const count = await this.prismaService.thread.count({
+      where: { user_id: userId },
+    });
+    const threads = await this.prismaService.thread.findMany({
+      where: {
+        user_id: userId,
+      },
+      include: {
+        user: {
+          select: { id: true, username: true, avatar: true, active: true },
+        },
+        images: { select: { image: true } },
+        _count: {
+          select: {
+            thread_likes: true,
+            thread_dislikes: true,
+            comments: true,
+          },
+        },
+      },
+      take: take ? take : 30,
+      skip: skip ? skip : 0,
+    });
+    return { threads, count };
+  }
   async findOne(id: string): Promise<Thread> {
     const thread = await this.prismaService.thread.findFirst({
       where: { id },

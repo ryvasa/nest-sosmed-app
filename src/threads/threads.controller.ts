@@ -99,6 +99,25 @@ export class ThreadsController {
     });
   }
 
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @ApiResponse({ status: 200, description: 'Send Threads.' })
+  @ApiResponse({ status: 404, description: 'User Not Found.' })
+  @ApiQuery({ name: 'take', required: false, type: String })
+  @ApiQuery({ name: 'skip', required: false, type: String })
+  @ApiOperation({ summary: 'Get Many Users Threads' })
+  @Get('user')
+  findManyByCreator(
+    @Req() request: any,
+    @Query('take', new ParseIntPipe({ optional: true })) take?: number,
+    @Query('skip', new ParseIntPipe({ optional: true })) skip?: number,
+  ) {
+    return this.threadsService.findManyByCreator({
+      userId: request.user.id,
+      take: take || 30,
+      skip: skip || 0,
+    });
+  }
+
   @ApiResponse({ status: 200, description: 'Get Thread.' })
   @ApiResponse({ status: 404, description: 'Threads Not Found.' })
   @ApiOperation({ summary: 'Get Thread By Id' })

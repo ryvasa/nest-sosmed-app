@@ -12,6 +12,18 @@ export class ThreadInterceptor implements NestInterceptor {
       map((data) => {
         if (typeof data === 'string') {
           return { message: data };
+        } else if (data.count && data.threads) {
+          return {
+            count: data.count,
+            threads: data.threads.map((item) => ({
+              id: item.id,
+              body: item.body,
+              created_at: item.created_at,
+              user: item.user,
+              images: item.images,
+              count: item._count,
+            })),
+          };
         } else if (Array.isArray(data)) {
           return data.map((item) => ({
             id: item.id,
