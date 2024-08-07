@@ -22,6 +22,8 @@ export class ThreadInterceptor implements NestInterceptor {
               user: item.user,
               images: item.images,
               count: item._count,
+              thread_likes: item.thread_likes,
+              thread_dislikes: item.thread_dislikes,
             })),
           };
         } else if (Array.isArray(data)) {
@@ -32,6 +34,8 @@ export class ThreadInterceptor implements NestInterceptor {
             user: item.user,
             images: item.images,
             count: item._count,
+            thread_likes: item.thread_likes,
+            thread_dislikes: item.thread_dislikes,
           }));
         } else {
           const res = {
@@ -42,6 +46,8 @@ export class ThreadInterceptor implements NestInterceptor {
             images: data.images,
             comments: data.comments,
             count: data._count,
+            thread_likes: data.thread_likes,
+            thread_dislikes: data.thread_dislikes,
           };
           return res;
         }

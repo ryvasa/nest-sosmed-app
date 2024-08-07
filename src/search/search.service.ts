@@ -4,7 +4,6 @@ import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class Searchservice {
-  q;
   constructor(
     private readonly usersService: UsersService,
     private readonly threadService: ThreadsService,

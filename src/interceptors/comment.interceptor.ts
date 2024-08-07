@@ -25,6 +25,8 @@ export class CommentInterceptor implements NestInterceptor {
               username: item.user.username,
               active: item.user.active,
             },
+            comment_likes: item.comment_likes,
+            comment_dislikes: item.comment_dislikes,
             count: item._count,
           }));
         } else {
@@ -38,6 +40,8 @@ export class CommentInterceptor implements NestInterceptor {
               username: data.user.username,
               active: data.user.active,
             },
+            comment_likes: data.comment_likes,
+            comment_dislikes: data.comment_dislikes,
             count: data._count,
           };
           return res;

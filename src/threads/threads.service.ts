@@ -66,6 +66,17 @@ export class ThreadsService {
           select: { id: true, username: true, avatar: true, active: true },
         },
         images: { select: { image: true } },
+        thread_likes: {
+          select: {
+            user: { select: { id: true } },
+          },
+        },
+        thread_dislikes: {
+          select: {
+            user: { select: { id: true } },
+          },
+        },
+
         _count: {
           select: {
             thread_likes: true,
@@ -91,6 +102,16 @@ export class ThreadsService {
         user: {
           select: { id: true, username: true, avatar: true, active: true },
         },
+        thread_likes: {
+          select: {
+            user: { select: { id: true } },
+          },
+        },
+        thread_dislikes: {
+          select: {
+            user: { select: { id: true } },
+          },
+        },
         images: { select: { image: true } },
         _count: {
           select: {
@@ -111,6 +132,16 @@ export class ThreadsService {
       include: {
         user: { select: { username: true, avatar: true, active: true } },
         images: { select: { image: true } },
+        thread_likes: {
+          select: {
+            user: { select: { id: true } },
+          },
+        },
+        thread_dislikes: {
+          select: {
+            user: { select: { id: true } },
+          },
+        },
         _count: {
           select: {
             thread_likes: true,

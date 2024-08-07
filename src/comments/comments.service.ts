@@ -20,6 +20,16 @@ const commentSelect = {
   body: true,
   user: { select: { id: true, username: true, avatar: true, active: true } },
   created_at: true,
+  comment_likes: {
+    select: {
+      user: { select: { id: true } },
+    },
+  },
+  comment_dislikes: {
+    select: {
+      user: { select: { id: true } },
+    },
+  },
   _count: {
     select: {
       comment_dislikes: true,
