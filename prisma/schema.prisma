@@ -8,39 +8,41 @@ datasource db {
 }
 
 model User {
-  id            String         @id @unique @default(uuid())
-  username      String         @unique @db.VarChar(100)
-  password      String
-  email         String         @unique @db.VarChar(100)
-  avatar        String?
-  active        Boolean  @default(false)
-  created_at    DateTime       @default(now())
-  updated_at    DateTime       @updatedAt
-  sentMessages Message[] @relation("SenderMessages")
-  receivedMessages Message[] @relation("ReceiverMessages")
-  comment_likes Comment_Like[]
-  comment_dislikes Comment_Dislike[]
-  comments      Comment[]
-  thread_likes  Thread_Like[]
-  thread_dislikes Thread_Dislike[]
-  threads       Thread[]
-  chats      ChatUser[]   
+  id                          String                 @id @unique @default(uuid())
+  username                    String                 @unique @db.VarChar(100)
+  password                    String
+  email                       String                 @unique @db.VarChar(100)
+  avatar                      String?
+  active                      Boolean                @default(false)
+  created_at                  DateTime               @default(now())
+  updated_at                  DateTime               @updatedAt
+  sentMessages                Message[]              @relation("SenderMessages")
+  receivedMessages            Message[]              @relation("ReceiverMessages")
+  comment_likes               Comment_Like[]
+  comment_dislikes            Comment_Dislike[]
+  comments                    Comment[]
+  thread_likes                Thread_Like[]
+  thread_dislikes             Thread_Dislike[]
+  threads                     Thread[]
+  chats                       ChatUser[]
+  NotificationSender    Notifications[]  @relation("SenderNotifications")
+  NotificationReceiver  Notifications[]  @relation("ReceiverNotifications")
 
   @@map("users")
 }
 
 model Thread {
-  id           String        @id @unique @default(uuid())
-  body         String
-  user_id      String?       
-  created_at   DateTime      @default(now())
-  updated_at   DateTime      @updatedAt
-  comments     Comment[]
-  images       Image[]
-  thread_likes Thread_Like[]
-  thread_dislikes Thread_Dislike[]
-  user         User?          @relation(fields: [user_id], references: [id],onDelete: SetNull)
-
+  id                  String                @id @unique @default(uuid())
+  body                String
+  user_id             String?
+  created_at          DateTime              @default(now())
+  updated_at          DateTime              @updatedAt
+  comments            Comment[]
+  images              Image[]
+  thread_likes        Thread_Like[]
+  thread_dislikes     Thread_Dislike[]
+  user                User?                 @relation(fields: [user_id], references: [id], onDelete: SetNull)
+notification Notifications[]
   @@map("threads")
 }
 
@@ -50,7 +52,7 @@ model Image {
   thread_id  String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
-  thread     Thread   @relation(fields: [thread_id], references: [id], onDelete: Cascade) 
+  thread     Thread   @relation(fields: [thread_id], references: [id], onDelete: Cascade)
 
   @@map("images")
 }
@@ -62,11 +64,12 @@ model Thread_Like {
   thread_id  String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
-  thread     Thread   @relation(fields: [thread_id], references: [id],onDelete: Cascade)
-  user       User?     @relation(fields: [user_id], references: [id],onDelete: SetNull)
+  thread     Thread   @relation(fields: [thread_id], references: [id], onDelete: Cascade)
+  user       User?    @relation(fields: [user_id], references: [id], onDelete: SetNull)
 
   @@map("thread_likes")
 }
+
 model Thread_Dislike {
   id         String   @id @unique @default(uuid())
   dislike    Boolean
@@ -74,22 +77,24 @@ model Thread_Dislike {
   thread_id  String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
-  thread     Thread   @relation(fields: [thread_id], references: [id],onDelete: Cascade)
-  user       User?     @relation(fields: [user_id], references: [id],onDelete: SetNull)
+  thread     Thread   @relation(fields: [thread_id], references: [id], onDelete: Cascade)
+  user       User?    @relation(fields: [user_id], references: [id], onDelete: SetNull)
 
   @@map("thread_dislikes")
 }
+
 model Comment {
-  id            String         @id @unique @default(uuid())
-  body          String
-  user_id       String?
-  thread_id     String
-  created_at    DateTime       @default(now())
-  updated_at    DateTime       @updatedAt
-  comment_likes Comment_Like[]
-  comment_dislikes Comment_Dislike[]
-  thread        Thread         @relation(fields: [thread_id], references: [id],onDelete: Cascade)
-  user          User?          @relation(fields: [user_id], references: [id],onDelete: SetNull)
+  id                    String                 @id @unique @default(uuid())
+  body                  String
+  user_id               String?
+  thread_id             String
+  created_at            DateTime               @default(now())
+  updated_at            DateTime               @updatedAt
+  comment_likes         Comment_Like[]
+  comment_dislikes      Comment_Dislike[]
+  notifications Notifications[]
+  thread                Thread                 @relation(fields: [thread_id], references: [id], onDelete: Cascade)
+  user                  User?                  @relation(fields: [user_id], references: [id], onDelete: SetNull)
 
   @@map("comments")
 }
@@ -97,12 +102,12 @@ model Comment {
 model Comment_Like {
   id         String   @id @unique @default(uuid())
   like       Boolean
-  user_id    String? 
+  user_id    String?
   comment_id String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
-  comment    Comment  @relation(fields: [comment_id], references: [id],onDelete: Cascade)
-  user       User?     @relation(fields: [user_id], references: [id],onDelete: SetNull)
+  comment    Comment  @relation(fields: [comment_id], references: [id], onDelete: Cascade)
+  user       User?    @relation(fields: [user_id], references: [id], onDelete: SetNull)
 
   @@map("comment_likes")
 }
@@ -114,46 +119,100 @@ model Comment_Dislike {
   comment_id String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
-  comment    Comment  @relation(fields: [comment_id], references: [id],onDelete: Cascade)
-  user       User?     @relation(fields: [user_id], references: [id],onDelete: SetNull)
+  comment    Comment  @relation(fields: [comment_id], references: [id], onDelete: Cascade)
+  user       User?    @relation(fields: [user_id], references: [id], onDelete: SetNull)
 
   @@map("comment_dislikes")
 }
 
 model Message {
-  id         String   @id @unique @default(uuid())
-  chat_id    String
-  sender_id    String?
-  receiver_id    String?
-  message    String
-  readed    Boolean  @default(false)
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  chat       Chat     @relation(fields: [chat_id], references: [id])
-  sender     User?    @relation("SenderMessages", fields: [sender_id], references: [id], onDelete: SetNull)
-  receiver   User?    @relation("ReceiverMessages", fields: [receiver_id], references: [id], onDelete: SetNull)
-
+  id          String   @id @unique @default(uuid())
+  chat_id     String
+  sender_id   String?
+  receiver_id String?
+  message     String
+  readed      Boolean  @default(false)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  chat        Chat     @relation(fields: [chat_id], references: [id])
+  sender      User?    @relation("SenderMessages", fields: [sender_id], references: [id], onDelete: SetNull)
+  receiver    User?    @relation("ReceiverMessages", fields: [receiver_id], references: [id], onDelete: SetNull)
 
   @@map("messages")
 }
 
 model Chat {
-  id         String   @id @unique @default(uuid())
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  messages      Message[]
-  users      ChatUser[]  
-  
+  id         String     @id @unique @default(uuid())
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+  messages   Message[]
+  users      ChatUser[]
+
   @@map("chats")
 }
 
 model ChatUser {
-  chat_id  String 
-  user_id  String
+  chat_id String
+  user_id String
 
-  chat    Chat   @relation(fields: [chat_id], references: [id])
-  user    User   @relation(fields: [user_id], references: [id])
-  
+  chat Chat @relation(fields: [chat_id], references: [id])
+  user User @relation(fields: [user_id], references: [id])
+
   @@id([chat_id, user_id])
   @@map("chat_users")
 }
+
+enum ActionType {
+  COMMENT
+  LIKE
+  DISLIKE
+}
+model Notifications {
+  id          String     @id @unique @default(uuid())
+  action      ActionType
+  thread_id     String
+  receiver_id String
+  sender_id   String
+  comment_id  String? 
+  readed  Boolean @default(false)
+  created_at  DateTime   @default(now())
+  sender      User       @relation("SenderNotifications", fields: [sender_id], references: [id])
+  receiver    User       @relation("ReceiverNotifications", fields: [receiver_id], references: [id])
+  comment     Comment?    @relation(fields: [comment_id], references: [id], onDelete: SetNull)
+  thread     Thread    @relation(fields: [thread_id], references: [id])
+
+  @@map("notifications")
+}
+// model ThreadNotifications {
+//   id          String     @id @unique @default(uuid())
+//   action      ActionType
+//   readed  Boolean @default(false)
+//   created_at  DateTime   @default(now())
+//   thread_id   String
+//   sender_id   String
+//   receiver_id String
+//   sender      User       @relation("SenderThreadNotifications", fields: [sender_id], references: [id])
+//   receiver    User       @relation("ReceiverThreadNotifications", fields: [receiver_id], references: [id])
+//   thread      Thread     @relation(fields: [thread_id], references: [id])
+
+//   @@map("thread_notifications")
+// }
+
+// model CommentNotifications {
+//   id          String     @id @unique @default(uuid())
+//   action      ActionType
+//   thread_id     String
+//   receiver_id String
+//   sender_id   String
+//   comment_id  String
+//   readed  Boolean @default(false)
+//   created_at  DateTime   @default(now())
+//   sender      User       @relation("SenderCommentNotifications", fields: [sender_id], references: [id])
+//   receiver    User       @relation("ReceiverCommentNotifications", fields: [receiver_id], references: [id])
+//   comment     Comment    @relation(fields: [comment_id], references: [id])
+//   thread     Thread    @relation(fields: [thread_id], references: [id])
+
+//   @@map("comment_notifications")
+// }
+
+

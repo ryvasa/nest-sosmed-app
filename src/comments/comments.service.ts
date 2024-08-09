@@ -7,6 +7,8 @@ import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
 import { ThreadsService } from '../threads/threads.service';
 import { PrismaService } from '../common/prisma.service';
+import { NotificationsService } from 'src/notifications/notifications.service';
+import { ActionType } from '@prisma/client';
 
 interface UpdateParams {
   threadId: string;
@@ -18,6 +20,7 @@ interface UpdateParams {
 const commentSelect = {
   id: true,
   body: true,
+  thread: true,
   user: { select: { id: true, username: true, avatar: true, active: true } },
   created_at: true,
   comment_likes: {
@@ -42,6 +45,7 @@ const commentSelect = {
 export class CommentsService {
   constructor(
     private threadService: ThreadsService,
+    private notificationService: NotificationsService,
     private prismaService: PrismaService,
   ) {}
 
@@ -72,6 +76,13 @@ export class CommentsService {
       },
       select: commentSelect,
     });
+    const data = {
+      receiver_id: comment.thread.user_id,
+      sender_id: userId,
+      action: 'COMMENT' as ActionType,
+      thread_id: threadId,
+    };
+    await this.notificationService.create(data);
     return comment;
   }
 

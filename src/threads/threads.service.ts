@@ -130,7 +130,9 @@ export class ThreadsService {
     const thread = await this.prismaService.thread.findFirst({
       where: { id },
       include: {
-        user: { select: { username: true, avatar: true, active: true } },
+        user: {
+          select: { id: true, username: true, avatar: true, active: true },
+        },
         images: { select: { image: true } },
         thread_likes: {
           select: {

@@ -1,12 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../common/prisma.service';
 import { ThreadsService } from '../threads/threads.service';
+import { NotificationsService } from '../notifications/notifications.service';
+import { ActionType } from '@prisma/client';
 
 @Injectable()
 export class LikeThreadService {
   constructor(
     private prismaService: PrismaService,
     private threadService: ThreadsService,
+    private notificationService: NotificationsService,
   ) {}
 
   async checkLikeThread(userId: string, threadId: string) {
@@ -16,6 +19,9 @@ export class LikeThreadService {
         user_id: userId,
         thread_id: threadId,
       },
+      include: {
+        thread: true,
+      },
     });
     return likedThread;
   }
@@ -24,13 +30,24 @@ export class LikeThreadService {
     if (like) {
       return { message: 'Already liked' };
     }
-    return this.prismaService.thread_Like.create({
+    const result = await this.prismaService.thread_Like.create({
       data: {
         user_id: userId,
         thread_id: threadId,
         like: true,
       },
+      include: {
+        thread: true,
+      },
     });
+    const data = {
+      receiver_id: result.thread.user_id,
+      sender_id: userId,
+      action: 'LIKE' as ActionType,
+      thread_id: threadId,
+    };
+    await this.notificationService.create(data);
+    return result;
   }
 
   async remove(userId: string, threadId: string) {
@@ -40,6 +57,14 @@ export class LikeThreadService {
         id: like.id,
       },
     });
+
+    const option = {
+      receiver_id: like.thread.user_id,
+      sender_id: userId,
+      action: 'LIKE' as ActionType,
+      thread_id: threadId,
+    };
+    await this.notificationService.remove(option);
     return { message: 'like removed' };
   }
 }
