@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -27,7 +28,9 @@ export class MessagesService {
     createMessageDto: CreateMessageDto,
   ): Promise<Message> {
     await this.chatService.findOne(chat_id);
-
+    if (sender_id === receiver_id) {
+      throw new BadRequestException('Sendetr and Receiver can not same.');
+    }
     const message = await this.prisma.message.create({
       data: {
         message: createMessageDto.message,

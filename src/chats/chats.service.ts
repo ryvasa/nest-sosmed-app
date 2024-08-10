@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../common/prisma.service';
 import { Chat } from '@prisma/client';
 import { ChatUserService } from '../common/chat-user.service';
@@ -15,6 +19,9 @@ export class ChatsService {
     const chat = await this.prismaService.chat.create({
       data: {},
     });
+    if (usersId[0] === usersId[1]) {
+      throw new BadRequestException('Sendetr and Receiver can not same.');
+    }
     usersId.forEach(async (user_id: string) => {
       await this.userService.findOne(user_id);
       await this.chatUserService.create(user_id, chat.id);

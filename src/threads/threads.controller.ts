@@ -105,14 +105,14 @@ export class ThreadsController {
   @ApiQuery({ name: 'take', required: false, type: String })
   @ApiQuery({ name: 'skip', required: false, type: String })
   @ApiOperation({ summary: 'Get Many Users Threads' })
-  @Get('user')
+  @Get('user/:id')
   findManyByCreator(
-    @Req() request: any,
+    @Param('id') id: string,
     @Query('take', new ParseIntPipe({ optional: true })) take?: number,
     @Query('skip', new ParseIntPipe({ optional: true })) skip?: number,
   ) {
     return this.threadsService.findManyByCreator({
-      userId: request.user.id,
+      userId: id,
       take: take || 30,
       skip: skip || 0,
     });
