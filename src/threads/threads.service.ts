@@ -61,6 +61,8 @@ export class ThreadsService {
       where: {
         body: { contains: body },
       },
+      orderBy: { created_at: 'desc' },
+
       include: {
         user: {
           select: { id: true, username: true, avatar: true, active: true },
@@ -98,6 +100,7 @@ export class ThreadsService {
       where: {
         user_id: userId,
       },
+      orderBy: { created_at: 'desc' },
       include: {
         user: {
           select: { id: true, username: true, avatar: true, active: true },
@@ -133,7 +136,7 @@ export class ThreadsService {
         user: {
           select: { id: true, username: true, avatar: true, active: true },
         },
-        images: { select: { image: true } },
+        images: { select: { id: true, image: true } },
         thread_likes: {
           select: {
             user: { select: { id: true } },
@@ -176,7 +179,26 @@ export class ThreadsService {
     userId,
   }: UpdateParams): Promise<Thread> {
     await this.validateAuthor(id, userId);
-
+    const savedImages = await this.prismaService.image.findMany({
+      where: { thread_id: id },
+      select: { image: true },
+    });
+    const filteredImage = savedImages.map((image: any) => image.image);
+    if (updateThreadDto.currentImages) {
+      await this.prismaService.image.deleteMany({
+        where: {
+          AND: [
+            { thread_id: id },
+            {
+              AND: [
+                { image: { in: filteredImage } },
+                { NOT: { image: { in: updateThreadDto.currentImages } } },
+              ],
+            },
+          ],
+        },
+      });
+    }
     const thread = await this.prismaService.thread.update({
       where: { id },
       data: {

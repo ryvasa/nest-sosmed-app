@@ -24,11 +24,10 @@ export class NotificationsGateway {
   @WebSocketServer()
   server: Server;
   @SubscribeMessage('notify')
-  handleNotify(
-    @MessageBody() room: any,
-    // @ConnectedSocket() socket: Socket,
-  ): void {
-    this.server.emit('notify', { message: 'hi from room' + room });
+  handleNotify() // @MessageBody() room: any,
+  // @ConnectedSocket() socket: Socket,
+  : void {
+    this.server.emit('notify');
   }
 
   @SubscribeMessage('thread-notify')
@@ -36,9 +35,14 @@ export class NotificationsGateway {
     @ConnectedSocket() socket: Socket,
   ): Promise<any> {
     const userId = socket['user']?.id;
-    console.log(userId);
-    const notification =
-      await this.notificationsService.countNotification(userId);
-    this.server.emit('thread-notify', notification);
+    this.server.emit('thread-notify');
+  }
+
+  @SubscribeMessage('comment-notify')
+  async handleComentNotification(
+    @ConnectedSocket() socket: Socket,
+  ): Promise<any> {
+    const userId = socket['user']?.id;
+    this.server.emit('thread-notify');
   }
 }

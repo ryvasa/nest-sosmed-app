@@ -15,14 +15,18 @@ export class ChatsService {
     private readonly userService: UsersService,
     private readonly chatUserService: ChatUserService,
   ) {}
-  async create(usersId: Array<string>): Promise<Chat> {
+  async create(currentId: string, receiverId: string): Promise<any> {
+    const isExsist = await this.checkExistingChat(currentId, receiverId);
+    if (isExsist.exist) {
+      return { id: isExsist.chatIds[0] };
+    }
     const chat = await this.prismaService.chat.create({
       data: {},
     });
-    if (usersId[0] === usersId[1]) {
+    if (currentId === receiverId) {
       throw new BadRequestException('Sendetr and Receiver can not same.');
     }
-    usersId.forEach(async (user_id: string) => {
+    [currentId, receiverId].forEach(async (user_id: string) => {
       await this.userService.findOne(user_id);
       await this.chatUserService.create(user_id, chat.id);
     });
@@ -63,6 +67,39 @@ export class ChatsService {
       },
     });
     return chats;
+  }
+  async checkExistingChat(currentId: string, receiverId: string) {
+    // Cari semua chat yang dimiliki oleh currentId
+    const chatsWithUser1 = await this.prismaService.chatUser.findMany({
+      where: {
+        user_id: currentId,
+      },
+      select: {
+        chat_id: true,
+      },
+    });
+
+    const chatIds = chatsWithUser1.map((chat) => chat.chat_id);
+
+    // Cari chat yang juga dimiliki oleh receiverId dari daftar chat_id yang ditemukan
+    const chatsWithUser2 = await this.prismaService.chatUser.findMany({
+      where: {
+        chat_id: {
+          in: chatIds,
+        },
+        user_id: receiverId,
+      },
+      select: {
+        chat_id: true,
+      },
+    });
+
+    // Ambil daftar chat_id yang memenuhi syarat
+    const chatIdsForBothUsers = chatsWithUser2.map((chat) => chat.chat_id);
+    return {
+      chatIds: chatIdsForBothUsers,
+      exist: chatIdsForBothUsers.length > 0,
+    };
   }
 
   async validateOwner(chatId: string, userId: string) {

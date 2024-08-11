@@ -3,7 +3,6 @@ import { IsEmail, IsOptional } from 'class-validator';
 
 export class UpdateUserDto {
   @ApiProperty({ type: String })
-  @IsEmail()
   @IsOptional()
   email?: string;
 
@@ -14,6 +13,10 @@ export class UpdateUserDto {
   @IsOptional()
   @ApiProperty({ type: String })
   password?: string;
+
+  @IsOptional()
+  @ApiProperty({ type: String })
+  newPassword?: string;
 
   @IsOptional()
   @ApiProperty({ type: String })

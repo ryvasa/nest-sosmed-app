@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../common/prisma.service';
 import { CommentsService } from '../comments/comments.service';
+import { NotificationsService } from 'src/notifications/notifications.service';
+import { ActionType } from '@prisma/client';
 
 interface LikeCommentParams {
   userId: string;
@@ -12,6 +14,7 @@ export class LikeCommentService {
   constructor(
     private prismaService: PrismaService,
     private commentService: CommentsService,
+    private notificationService: NotificationsService,
   ) {}
 
   async checkLikeComment({ commentId, threadId, userId }: LikeCommentParams) {
@@ -21,6 +24,7 @@ export class LikeCommentService {
         user_id: userId,
         comment_id: commentId,
       },
+      include: { comment: true },
     });
     return likedComment;
   }
@@ -33,13 +37,26 @@ export class LikeCommentService {
     if (like) {
       return { message: 'Already liked' };
     }
-    return this.prismaService.comment_Like.create({
+
+    const result = await this.prismaService.comment_Like.create({
       data: {
         user_id: userId,
         comment_id: commentId,
         like: true,
       },
+      include: { comment: true },
     });
+
+    const data = {
+      receiver_id: result.comment.user_id,
+      sender_id: userId,
+      action: 'LIKE' as ActionType,
+      thread_id: result.comment.thread_id,
+      comment_id: result.comment_id,
+    };
+    await this.notificationService.create(data);
+
+    return result;
   }
 
   async remove({ userId, commentId, threadId }: LikeCommentParams) {
@@ -56,6 +73,15 @@ export class LikeCommentService {
         id: like.id,
       },
     });
+    const option = {
+      receiver_id: like.comment.user_id,
+      sender_id: userId,
+      action: 'LIKE' as ActionType,
+      thread_id: threadId,
+      comment_id: commentId,
+    };
+    await this.notificationService.remove(option);
+
     return { message: 'Like removed' };
   }
 }

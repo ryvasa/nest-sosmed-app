@@ -163,9 +163,10 @@ export class ThreadsController {
     )
     files: Express.Multer.File[],
     @Param('id') id: string,
-    @Body() updateThreadDto: UpdateThreadDto,
+    @Body() updateThreadDto,
     @Req() request: any,
   ) {
+    updateThreadDto.currentImages = updateThreadDto.currentImages.split(',');
     return this.threadsService.update({
       files,
       id,

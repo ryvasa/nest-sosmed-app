@@ -26,10 +26,7 @@ export class ChatsController {
   @ApiOperation({ summary: 'Create Chat' })
   @Post()
   create(@Req() request: any, @Body() createChatDto: CreateChatDto) {
-    return this.chatsService.create([
-      request.user.id,
-      createChatDto.receiverId,
-    ]);
+    return this.chatsService.create(request.user.id, createChatDto.receiverId);
   }
 
   @ApiOperation({ summary: 'Get All Chats' })

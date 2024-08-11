@@ -114,15 +114,17 @@ export class MessagesService {
 
   async setReadedMessages(chatId: string, userId: string): Promise<void> {
     const chat = await this.chatService.findOne(chatId);
-    if (chat.messages[chat.messages.length - 1].sender_id !== userId) {
-      await this.prisma.message.updateMany({
-        where: {
-          AND: [{ chat_id: chatId }, { readed: false }],
-        },
-        data: {
-          readed: true,
-        },
-      });
+    if (chat.messages.length > 0) {
+      if (chat.messages[chat.messages.length - 1].sender_id !== userId) {
+        await this.prisma.message.updateMany({
+          where: {
+            AND: [{ chat_id: chatId }, { readed: false }],
+          },
+          data: {
+            readed: true,
+          },
+        });
+      }
     }
   }
 

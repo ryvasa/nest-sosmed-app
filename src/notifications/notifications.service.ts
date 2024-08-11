@@ -58,7 +58,6 @@ export class NotificationsService {
     });
   }
   async authorCheck(notificationId: string, userId: string) {
-    console.log({ notificationId, userId });
     const result = await this.prismaService.notifications.findFirst({
       where: {
         AND: [

@@ -1,4 +1,5 @@
 import {
+  ForbiddenException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -49,8 +50,11 @@ export class UsersService {
   }
 
   async update({ file, id, updateUserDto, userId }: UpdateParams) {
-    const user = await this.findOne(id);
-
+    const user = await this.prismaService.user.findFirst({ where: { id } });
+    const validUser = bcrypt.compare(updateUserDto.password, user.password);
+    if (!validUser) {
+      throw new ForbiddenException('You are not allowed');
+    }
     updateUserDto.email = updateUserDto.email
       ? updateUserDto.email
       : user.email;
@@ -61,7 +65,7 @@ export class UsersService {
       ? updateUserDto.avatar
       : user.avatar;
     updateUserDto.password = updateUserDto.password
-      ? await bcrypt.hash(updateUserDto.password, 10)
+      ? await bcrypt.hash(updateUserDto.newPassword, 10)
       : user.password;
 
     if (userId !== id) {
@@ -71,11 +75,11 @@ export class UsersService {
     }
 
     if (file) {
-      updateUserDto.avatar = `/images/avatars/${file.filename}`;
+      updateUserDto.avatar = `images/avatars/${file.filename}`;
     }
-
+    const { newPassword, ...data } = updateUserDto;
     const updatedUser = await this.prismaService.user.update({
-      data: updateUserDto,
+      data,
       where: { id },
     });
     return updatedUser;
