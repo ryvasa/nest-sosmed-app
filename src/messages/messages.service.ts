@@ -74,6 +74,15 @@ export class MessagesService {
     return message;
   }
 
+  async countMessages(chat_id: string): Promise<number> {
+    const message = await this.prisma.message.count({
+      where: {
+        chat_id,
+      },
+    });
+    return message;
+  }
+
   async validateAuthorMessage(
     messageId: string,
     userId: string,

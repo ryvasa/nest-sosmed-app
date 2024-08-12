@@ -60,6 +60,18 @@ export class MessageController {
     return this.messageService.findOne(id);
   }
 
+  @ApiOperation({ summary: 'Get cpunt Message by ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Count Message retrieved successfully.',
+  })
+  @ApiResponse({ status: 404, description: 'Count Message not found.' })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  @Get(':id/count')
+  async getCount(@Param('id') id: string) {
+    return this.messageService.countMessages(id);
+  }
+
   @ApiOperation({ summary: 'Update Message by ID' })
   @ApiResponse({ status: 200, description: 'Message retrieved successfully.' })
   @ApiResponse({ status: 404, description: 'Message not found.' })
