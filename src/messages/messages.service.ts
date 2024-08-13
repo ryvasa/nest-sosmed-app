@@ -55,6 +55,10 @@ export class MessagesService {
           OR: [{ sender_id: userid }, { receiver_id: userid }],
         },
       },
+      include: {
+        receiver: { select: { avatar: true, id: true, username: true } },
+        sender: { select: { avatar: true, id: true, username: true } },
+      },
       orderBy: { created_at: 'desc' },
       take,
       skip,

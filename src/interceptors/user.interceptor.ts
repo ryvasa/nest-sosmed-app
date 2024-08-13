@@ -29,6 +29,7 @@ export class UserInterceptor implements NestInterceptor {
             active: data.active,
             created_at: data.created_at,
             updated_at: data.updated_at,
+            email: data.email,
           };
           return res;
         }

@@ -40,6 +40,7 @@ export class UsersService {
         created_at: true,
         updated_at: true,
         avatar: true,
+        email: true,
       },
       where: { id },
     });
@@ -61,8 +62,8 @@ export class UsersService {
     updateUserDto.username = updateUserDto.username
       ? updateUserDto.username
       : user.username;
-    updateUserDto.avatar = updateUserDto.avatar
-      ? updateUserDto.avatar
+    updateUserDto.avatar = updateUserDto.currentAvatar
+      ? updateUserDto.currentAvatar
       : user.avatar;
     updateUserDto.password = updateUserDto.password
       ? await bcrypt.hash(updateUserDto.newPassword, 10)
@@ -77,7 +78,7 @@ export class UsersService {
     if (file) {
       updateUserDto.avatar = `images/avatars/${file.filename}`;
     }
-    const { newPassword, ...data } = updateUserDto;
+    const { newPassword, currentAvatar, ...data } = updateUserDto;
     const updatedUser = await this.prismaService.user.update({
       data,
       where: { id },

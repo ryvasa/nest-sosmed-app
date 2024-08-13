@@ -21,4 +21,8 @@ export class UpdateUserDto {
   @IsOptional()
   @ApiProperty({ type: String })
   avatar?: string;
+
+  @IsOptional()
+  @ApiProperty({ type: String })
+  currentAvatar?: string;
 }
