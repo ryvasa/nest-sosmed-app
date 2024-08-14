@@ -27,7 +27,6 @@ import {
 } from '@nestjs/swagger';
 import { ThreadsService } from './threads.service';
 import { CreateThreadDto } from './dto/create-thread.dto';
-import { UpdateThreadDto } from './dto/update-thread.dto';
 import { JwtAuthGuard } from '../auth/utils/jwt/jwt.auth.guard';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { photosStorage } from '../common/storage.config';

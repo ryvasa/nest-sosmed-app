@@ -15,7 +15,7 @@ import { CreateMessageDto } from './dto/create-message.dto';
 @WebSocketGateway({
   namespace: 'messages',
   cors: {
-    origin: 'http://localhost:3001',
+    origin: ['http://localhost:3001', process.env.CONSUME_URL],
     credentials: true,
   },
 })
@@ -89,7 +89,7 @@ export class MessagesGateway {
   @SubscribeMessage('notify')
   handleNotify(
     @MessageBody() room: any,
-    @ConnectedSocket() socket: Socket,
+    // @ConnectedSocket() socket: Socket,
   ): void {
     this.server.emit('notify', { message: 'hi from room' + room });
   }

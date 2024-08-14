@@ -4,7 +4,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../common/prisma.service';
-import { Chat } from '@prisma/client';
 import { ChatUserService } from '../common/chat-user.service';
 import { UsersService } from '../users/users.service';
 
