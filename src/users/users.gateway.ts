@@ -13,7 +13,7 @@ import { UsersService } from './users.service';
 @WebSocketGateway({
   namespace: 'users',
   cors: {
-    origin: ['http://localhost:3001', process.env.CONSUME_URL],
+    origin: process.env.CONSUME_URL,
     credentials: true,
   },
 })

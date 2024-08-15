@@ -15,7 +15,7 @@ import { CreateMessageDto } from './dto/create-message.dto';
 @WebSocketGateway({
   namespace: 'messages',
   cors: {
-    origin: ['http://localhost:3001', process.env.CONSUME_URL],
+    origin: process.env.CONSUME_URL,
     credentials: true,
   },
 })

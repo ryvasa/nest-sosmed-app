@@ -14,7 +14,7 @@ import { WsGuard } from '../auth/utils/ws/ws.guard';
 @WebSocketGateway({
   namespace: 'notifications',
   cors: {
-    origin: ['http://localhost:3001', process.env.CONSUME_URL],
+    origin: process.env.CONSUME_URL,
     credentials: true,
   },
 })
