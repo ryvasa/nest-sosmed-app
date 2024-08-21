@@ -34,9 +34,8 @@ $ yarn install
 
 ## Setup Database
 
-```
-Create database "nest_sosmed_app"
-```
+# Create database "nest_sosmed_app"
+
 
 ## Migrate
 
