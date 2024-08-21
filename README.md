@@ -32,6 +32,18 @@
 $ yarn install
 ```
 
+## Setup Database
+
+```
+Create database "nest_sosmed_app"
+```
+
+## Migrate
+
+```bash
+$ npx prisma migrate dev --name migration-name
+```
+
 ## Running the app
 
 ```bash
