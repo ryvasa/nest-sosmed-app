@@ -12,7 +12,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         JwtStrategy.extractJWTFromCookie,
       ]),
       ignoreExpiration: true,
-      secretOrKey: configService.get('JWT_SECREATE'),
+      secretOrKey: configService.get('JWT_SECRET'),
     });
   }
   private static extractJWTFromCookie(req: Request): string | null {

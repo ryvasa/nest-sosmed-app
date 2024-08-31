@@ -36,6 +36,15 @@ $ yarn install
 
 Create database "nest_sosmed_app"
 
+## .env File
+Add .env file and write variables as below
+
+```code
+DATABASE_URL= your database url
+JWT_SECRET= your secret key
+CONSUME_URL= your consumer app or frontend app
+```
+
 
 ## Migrate
 
