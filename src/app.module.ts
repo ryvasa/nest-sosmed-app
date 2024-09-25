@@ -18,6 +18,8 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { SearchModule } from './search/search.module';
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
+import { VideoCallModule } from './video-call/video-call.module';
+import { MemoryCacheModule } from './cache/cache.module';
 
 @Module({
   imports: [
@@ -44,6 +46,8 @@ import { AppController } from './app.controller';
     ChatsModule,
     NotificationsModule,
     SearchModule,
+    VideoCallModule,
+    MemoryCacheModule,
   ],
   controllers: [AppController],
   providers: [AppService],

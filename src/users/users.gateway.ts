@@ -25,7 +25,7 @@ export class UsersGateway {
   @SubscribeMessage('active')
   async handleActive(@ConnectedSocket() socket: Socket) {
     const userId = socket['user']?.id;
-    console.log('active', userId);
+    // console.log('active', userId);
     if (userId) {
       await this.usersService.setActiveToUser(userId);
       this.server.emit('activeStatus', { userId, active: true });
@@ -36,7 +36,7 @@ export class UsersGateway {
   @SubscribeMessage('inactive')
   async handleInactive(@ConnectedSocket() socket: Socket) {
     const userId = socket['user']?.id;
-    console.log('disconnected', userId);
+    // console.log('disconnected', userId);
     if (userId) {
       await this.usersService.setNonActiveToUser(userId);
       this.server.emit('activeStatus', { userId, active: false });

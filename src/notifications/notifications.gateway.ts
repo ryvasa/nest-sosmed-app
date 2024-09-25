@@ -26,7 +26,7 @@ export class NotificationsGateway {
     @MessageBody() room: string,
     @ConnectedSocket() socket: Socket,
   ) {
-    console.log(`Socket ${socket.id} joined notifications room ${room}`);
+    // console.log(`Socket ${socket.id} joined notifications room ${room}`);
     socket.join(room);
   }
 
@@ -35,7 +35,7 @@ export class NotificationsGateway {
     @MessageBody() room: string,
     @ConnectedSocket() socket: Socket,
   ) {
-    console.log(`Socket ${socket.id} left notifications room ${room}`);
+    // console.log(`Socket ${socket.id} left notifications room ${room}`);
     socket.leave(room);
   }
 

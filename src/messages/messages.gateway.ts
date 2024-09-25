@@ -29,7 +29,7 @@ export class MessagesGateway {
     @MessageBody() room: string,
     @ConnectedSocket() socket: Socket,
   ) {
-    console.log(`Socket ${socket.id} joined room ${room}`);
+    // console.log(`Socket ${socket.id} joined room ${room}`);
     socket.join(room);
   }
 
@@ -38,7 +38,7 @@ export class MessagesGateway {
     @MessageBody() room: string,
     @ConnectedSocket() socket: Socket,
   ) {
-    console.log(`Socket ${socket.id} left room ${room}`);
+    // console.log(`Socket ${socket.id} left room ${room}`);
     socket.leave(room);
   }
 
@@ -47,7 +47,7 @@ export class MessagesGateway {
   handleCheckRoom(client: Socket, room: string) {
     const rooms = Array.from(client.rooms);
     const inRoom = rooms.includes(room);
-    console.log('roomStatus', { room, inRoom });
+    // console.log('roomStatus', { room, inRoom });
     this.server.emit('roomStatus', { room, inRoom });
   }
 
@@ -78,7 +78,7 @@ export class MessagesGateway {
     @MessageBody() room: string,
     @ConnectedSocket() socket: Socket,
   ) {
-    console.log(`readed message  room ${room}`);
+    // console.log(`readed message  room ${room}`);
     const userId = socket['user'].id;
     await this.messagesService.setReadedMessages(room, userId);
     this.server
